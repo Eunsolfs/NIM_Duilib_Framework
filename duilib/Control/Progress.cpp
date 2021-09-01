@@ -155,6 +155,16 @@ void Progress::SetAttribute(const std::wstring& srName, const std::wstring& strV
   else if (srName == _T("marqueewidth")) SetMarqueeWidth(_ttoi(strValue.c_str()));
   else if (srName == _T("marqueestep")) SetMarqueeStep(_ttoi(strValue.c_str()));
   else if (srName == _T("reverse")) SetReverse(strValue == _T("true"));
+  else if (srName == _T("marqueemargin")) {
+    UiRect rcMargin;
+    LPTSTR pstr = NULL;
+    rcMargin.left = _tcstol(strValue.c_str(), &pstr, 10);  ASSERT(pstr);
+    rcMargin.top = _tcstol(pstr + 1, &pstr, 10);    ASSERT(pstr);
+    rcMargin.right = _tcstol(pstr + 1, &pstr, 10);  ASSERT(pstr);
+    rcMargin.bottom = _tcstol(pstr + 1, &pstr, 10); ASSERT(pstr);
+    SetMarqueeMagin(rcMargin);
+  }
+  else if (srName == _T("marqueeelapsed")) SetMarqueeElapsed(_ttoi(strValue.c_str()));
 	else Label::SetAttribute(srName, strValue);
 }
 
@@ -267,15 +277,30 @@ void Progress::Play() {
 	}
 	m_nMarqueePos = m_nMarqueePos + m_nMarqueeStep;
 
-	ui::UiRect rc = m_rcItem;
-	if (m_bHorizontal) {
-		if (m_nMarqueePos > rc.right - rc.left)
-			m_nMarqueePos = (m_nMarqueePos - (rc.right - rc.left)) - m_nMarqueeWidth;
-	}
-	else {
-		if (m_nMarqueePos > rc.bottom - rc.top)
-			m_nMarqueePos = (m_nMarqueePos - (rc.bottom - rc.top) - m_nMarqueeWidth);
-	}
+  if (!m_progressImage.imageAttribute.simageString.empty()) {
+    ui::UiRect rc = m_rcItem;
+    rc.Deflate(m_MarqueeMargin);
+    if (m_bHorizontal) {
+      if (m_nMarqueePos > rc.right - rc.left)
+        m_nMarqueePos = 0;
+    } else {
+      if (m_nMarqueePos > rc.bottom - rc.top)
+        m_nMarqueePos = 0;
+    }
+
+  } else {
+    ui::UiRect rc = m_rcItem;
+    if (m_bHorizontal) {
+      if (m_nMarqueePos > rc.right - rc.left)
+        m_nMarqueePos = (m_nMarqueePos - (rc.right - rc.left)) - m_nMarqueeWidth;
+    }
+    else {
+      if (m_nMarqueePos > rc.bottom - rc.top)
+        m_nMarqueePos = (m_nMarqueePos - (rc.bottom - rc.top) - m_nMarqueeWidth);
+    }
+  }
+
+	
 
 	Invalidate();
 }
@@ -298,6 +323,34 @@ void Progress::PaintMarquee(IRenderContext* pRender) {
 			pRender->DrawColor(rc, dwProgressColor);
 		}
 	}
+
+  if (!m_progressImage.imageAttribute.simageString.empty()) {
+    m_sProgressImageModify.clear();
+
+    if (m_progressImage.imageCache) {
+      ui::UiRect rc(0, 0, m_rcItem.GetWidth(), m_rcItem.GetHeight());
+      rc.Deflate(m_MarqueeMargin);
+
+      ui::UiRect m_rcSrc(0, 0, m_progressImage.imageCache->nX, m_progressImage.imageCache->nY);
+
+      if (m_bHorizontal) {
+        rc.left = max(m_nMarqueePos, 0) + rc.left;
+        rc.right = rc.left + m_progressImage.imageCache->nX;
+        m_nMarqueePos += m_progressImage.imageCache->nX;
+      }  else {
+        rc.top = max(m_nMarqueePos, 0) + rc.top;
+        rc.bottom = rc.top + m_progressImage.imageCache->nY;
+        m_nMarqueePos += m_progressImage.imageCache->nY;
+      }
+      DpiManager::GetInstance()->ScaleRect(rc);
+
+      m_sProgressImageModify = StringHelper::Printf(_T("destscale='false' dest='%d,%d,%d,%d' source='%d,%d,%d,%d'")
+        , rc.left, rc.top, rc.right, rc.bottom
+        , m_rcSrc.left, m_rcSrc.top, m_rcSrc.right, m_rcSrc.bottom);
+    }
+
+    DrawImage(pRender, m_progressImage, m_sProgressImageModify);
+  }
 }
 
 bool Progress::IsMarquee()
@@ -361,7 +414,7 @@ int Progress::GetMarqueeElapsed()
 
 void Progress::SetMarqueeElapsed(int nMarqueeElapsed)
 {
-	if (!IsMarquee() || m_nMarqueeElapsed == m_nMarqueeElapsed)
+	if (!IsMarquee() || m_nMarqueeElapsed == nMarqueeElapsed)
 		return;
 
 	m_nMarqueeElapsed = nMarqueeElapsed;
@@ -375,6 +428,11 @@ void Progress::SetMarqueeElapsed(int nMarqueeElapsed)
 
 void Progress::SetReverse(bool bReverse){
   m_bReverse = bReverse;
+}
+
+void Progress::SetMarqueeMagin(const ui::UiRect& marqueeMargin) {
+  m_MarqueeMargin = marqueeMargin;
+  DpiManager::GetInstance()->ScaleRect(m_MarqueeMargin);
 }
 
 }

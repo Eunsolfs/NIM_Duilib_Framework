@@ -181,6 +181,8 @@ public:
   */
   void SetReverse(bool bReverse);
 
+  void SetMarqueeMagin(const ui::UiRect& marqueeMargin);
+
 protected:
 	bool m_bHorizontal;
 	bool m_bStretchForeImage;
@@ -196,6 +198,7 @@ protected:
 	int m_nMarqueeStep;
 	int m_nMarqueeElapsed;
 	int m_nMarqueePos;
+  ui::UiRect m_MarqueeMargin;
 
   bool m_bReverse;
 
