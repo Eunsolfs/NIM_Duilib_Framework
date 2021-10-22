@@ -38,6 +38,10 @@ void WkeWebView::DoInit() {
 
   wkeOnPaintBitUpdated(m_wke_web_view, OnPaintCallback, this);
 
+  wkeSetHandle(m_wke_web_view, m_pWindow->GetHWND());
+
+  wkeSetUserAgent(m_wke_web_view, "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.2228.0 Safari/537.36");
+
   m_pWindow->AddMessageFilter(this);
 
   AttachResize(ToWeakCallback([this](ui::EventArgs* args) {
@@ -88,11 +92,21 @@ LRESULT WkeWebView::MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL
   switch (uMsg) {
 
   case WM_SETCURSOR:
+  {
+    POINT pt = { 0 };
+    ::GetCursorPos(&pt);
+    ::ScreenToClient(m_pWindow->GetHWND(), &pt);
+    Control* pControl = m_pWindow->FindControl(pt);
+    if (pControl != NULL && pControl->IsFloat()) {
+     bHandled = false;
+      break;
+    }
+
     if (SetCursorInfoTypeByCache()) {
       bHandled = true;
     }
     break;
-
+  }
   case WM_KEYDOWN:
   {
     if (!IsFocused()) {

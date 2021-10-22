@@ -449,6 +449,12 @@ void WebViewBase::SetContextMenuEnabled(bool enabled) {
   }
 }
 
+void WebViewBase::ClearCookie() {
+  if (m_wke_web_view) {
+    wkeClearCookie(m_wke_web_view);
+  }
+}
+
 void WebViewBase::OnTitleChanged(wkeWebView webView, const wkeString title) {
   std::wstring title_temp = wkeGetStringW(title);
   if (m_title_changed_callback) {

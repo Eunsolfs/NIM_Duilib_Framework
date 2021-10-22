@@ -100,6 +100,7 @@ public:
 
   void NetHookRequest(wkeNetJob job);
   void SetContextMenuEnabled(bool enabled);
+  void ClearCookie();
 
   virtual void OnTitleChanged(wkeWebView webView, const wkeString title);
 
