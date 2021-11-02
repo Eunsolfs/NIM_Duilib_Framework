@@ -3,6 +3,8 @@
 #include <shlwapi.h>
 #include "Utils/UnZip.h"
 
+#include <windows.h>
+
 namespace ui 
 {
 
@@ -814,7 +816,19 @@ std::wstring GlobalManager::GetResPath(const std::wstring& res_path, const std::
 	imageFullPath = GlobalManager::GetResourcePath() + window_res_path + res_path;
 	imageFullPath = StringHelper::ReparsePath(imageFullPath);
 
-	if (!GlobalManager::IsZipResExist(imageFullPath) && !::PathFileExists(imageFullPath.c_str())) {
+  if (!GlobalManager::IsZipResExist(imageFullPath) && !::PathFileExists(imageFullPath.c_str())) {
+    wchar_t exe_path[MAX_PATH + 1] = { 0 };
+    GetModuleFileName(NULL, exe_path, MAX_PATH);
+    std::wstring directory_path = exe_path;
+    int pos = directory_path.rfind(L"\\");
+    if (pos != std::wstring::npos) {
+      directory_path = directory_path.substr(0, pos);
+    }
+
+    std::wstring absolute_path = StringHelper::Printf(L"%s%s", directory_path.c_str(), imageFullPath.c_str());
+    if (::PathFileExists(absolute_path.c_str())) {
+      return absolute_path;
+    }
 		imageFullPath = GlobalManager::GetResourcePath() + res_path;
 		imageFullPath = StringHelper::ReparsePath(imageFullPath);
 	}
