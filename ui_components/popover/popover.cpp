@@ -1438,8 +1438,12 @@ void PopoverLayer::OnMouseEventButtonDown(POINT pt)
       if (!::PtInRect(&pos, pt) && 
         (!(popover->m_nShowType & kTriggerClick) || popover->GetAnchor() != control )&&
         popover->m_nDisappearType & kTriggerClickLayer) {
-        nbase::ThreadManager::PostTask(kThreadUI,
-          ToWeakCallback([this, popover]() {popover->TriggerResult({ kResultNone }, true); }));
+        auto weak_flag = popover->GetWeakFlag();
+        nbase::ThreadManager::PostTask(kThreadUI, ToWeakCallback([this, popover, weak_flag]() {
+          if (weak_flag.expired()) {
+            return;
+          }
+          popover->TriggerResult({ kResultNone }, true); }));
       }
     }
   };
