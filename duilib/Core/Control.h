@@ -846,25 +846,25 @@ public:
   * @param[in] start_angle loading图片旋转的角度
   * @return 无
   */
-  void StartLoading(int fStartAngle = -1);
+  virtual void StartLoading(int fStartAngle = -1);
 
   /**
   * @brief 关闭loading状态
   * @param[in] frame 播放完成停止在哪一帧，可设置第一帧、当前帧和最后一帧。请参考 GifStopType 枚举
   * @return 无
   */
-  void StopLoading(GifStopType frame = kGifStopFirst);
+  virtual void StopLoading(GifStopType frame = kGifStopFirst);
 
   /**
   * @brief 计算loading图片的旋转角度
   * @return 无
   */
-  void Loading();
+  virtual void Loading();
   /**
   * @brief 是否正在loading
   * @return 在loading返回true, 反之返回false
   */
-  bool IsLoading();
+  virtual bool IsLoading();
 
 	/// 动画管理
 	/**
@@ -976,12 +976,33 @@ public:
 	*/
 	void AttachLastEvent(const EventCallback& callback) { OnEvent[kEventLast] += callback; }
 
+  /**
+  * @brief 监听控件显示或隐藏事件
+  * @param[in] callback 事件处理的回调函数，请参考 EventCallback 声明
+  * @return 无
+  */
+  void AttachVisibleChange(const EventCallback& callback) { OnEvent[kEventVisibleChange] += callback; }
+
 	/**
-	* @brief 监听控件显示或隐藏事件
+	* @brief 监听键盘按键按下事件
 	* @param[in] callback 事件处理的回调函数，请参考 EventCallback 声明
 	* @return 无
 	*/
-	void AttachVisibleChange(const EventCallback& callback) { OnEvent[kEventVisibleChange] += callback; }
+	void AttachKeyDown(const EventCallback& callback) { OnEvent[kEventKeyDown] += callback; }
+
+  /**
+  * @brief 监听键盘按键输入事件
+  * @param[in] callback 事件处理的回调函数，请参考 EventCallback 声明
+  * @return 无
+  */
+  void AttachKeyChar(const EventCallback& callback) { OnEvent[kEventChar] += callback; }
+
+  /**
+  * @brief 监听键盘按键抬起事件
+  * @param[in] callback 事件处理的回调函数，请参考 EventCallback 声明
+  * @return 无
+  */
+  void AttachKeyUp(const EventCallback& callback) { OnEvent[kEventKeyUp] += callback; }
 
 	/**
 	 * @brief 取消监听指定事件，见 EventType 枚举

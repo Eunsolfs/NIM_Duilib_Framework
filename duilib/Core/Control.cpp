@@ -1639,6 +1639,25 @@ void Control::PaintLoading(IRenderContext* pRender) {
     ASSERT(FALSE);
     return;
   }
+
+  UiRect rcNewDest;
+  ui::UiRect rcDest = m_loadingImage.imageAttribute.rcDest;
+  if (rcDest.left != DUI_NOSET_VALUE && rcDest.top != DUI_NOSET_VALUE
+    && rcDest.right != DUI_NOSET_VALUE && rcDest.bottom != DUI_NOSET_VALUE) {
+    rcNewDest.left = m_rcItem.left + rcDest.left;
+    rcNewDest.right = m_rcItem.left + rcDest.right;
+    rcNewDest.top = m_rcItem.top + rcDest.top;
+    rcNewDest.bottom = m_rcItem.top + rcDest.bottom;
+  }
+  UiRect rcNewSource = m_loadingImage.imageAttribute.rcSource;
+  if (rcNewSource.left == DUI_NOSET_VALUE || rcNewSource.top == DUI_NOSET_VALUE
+    || rcNewSource.right == DUI_NOSET_VALUE || rcNewSource.bottom == DUI_NOSET_VALUE) {
+    rcNewSource.left = 0;
+    rcNewSource.top = 0;
+    rcNewSource.right = m_loadingImage.imageCache->nX;
+    rcNewSource.bottom = m_loadingImage.imageCache->nY;
+  }
+
   if (!m_strLoadingBkColor.empty()) {
     Gdiplus::SolidBrush brush(GetWindowColor(m_strLoadingBkColor));
     ui::UiRect rcFill = m_rcItem;
@@ -1647,12 +1666,8 @@ void Control::PaintLoading(IRenderContext* pRender) {
     rcFill.top = m_rcItem.top + (m_rcItem.GetHeight() - image->GetHeight()) / 2;
     rcFill.bottom = rcFill.top + image->GetHeight();
 
-    ui::UiRect rcDest = m_loadingImage.imageAttribute.rcDest;
-    if (!rcDest.IsRectEmpty()) {
-      rcFill.left = m_rcItem.left + rcDest.left;
-      rcFill.right = m_rcItem.left + rcDest.right;
-      rcFill.top = m_rcItem.top + rcDest.top;
-      rcFill.bottom = m_rcItem.bottom + rcDest.bottom;
+    if (!rcNewDest.IsRectEmpty()) {
+      rcFill = rcNewDest;
     }
 
     pRender->DrawColor(rcFill, GetWindowColor(m_strLoadingBkColor));
@@ -1668,11 +1683,18 @@ void Control::PaintLoading(IRenderContext* pRender) {
 
   temp_render.DrawImage(image, 0.f, 0.f);
 
+  if (rcNewDest.IsRectEmpty()) {
+    rcNewDest.left = m_rcItem.left + (GetWidth() - rcNewSource.GetWidth()) / 2;
+    rcNewDest.right = rcNewDest.left + rcNewSource.GetWidth();
+    rcNewDest.top = m_rcItem.top + (GetHeight() - rcNewSource.GetHeight()) / 2;
+    rcNewDest.bottom = rcNewDest.top + rcNewSource.GetHeight();
+  }
+
   Gdiplus::Graphics graphics(pRender->GetDC());
   graphics.DrawImage(&tempBitmap,
-    Gdiplus::RectF(m_rcItem.left + (GetWidth() - image->GetWidth()) / 2, m_rcItem.top + (GetHeight() - image->GetHeight()) / 2, image->GetWidth(), image->GetHeight()),
-    0, 0, image->GetWidth(), image->GetHeight(),
-    Gdiplus::UnitPixel);
+      Gdiplus::RectF(rcNewDest.left, rcNewDest.top, rcNewDest.GetWidth(), rcNewDest.GetHeight()),
+      rcNewSource.left, rcNewSource.top, rcNewSource.GetWidth(), rcNewSource.GetHeight(),
+      Gdiplus::UnitPixel);
 
   delete image;
 }
