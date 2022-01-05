@@ -962,8 +962,6 @@ ui::UiRect Popover::ReCalcByAnchorPos(ui::UiRect rc)
         rc.left = anchorPos.left - (size.cx - anchorPos.GetWidth()) / 2;
     }
 
-    
-
     if (bHasArrow) {
       auto dpi = ui::DpiManager::GetInstance();
       if (m_nPlacement & kPlaceLeftTop ||
@@ -994,6 +992,11 @@ ui::UiRect Popover::ReCalcByAnchorPos(ui::UiRect rc)
         m_nPlacement & kPlaceBottomRight) {
         int offset = (PopoverArrow::kMargin + PopoverArrow::kWidth / 2);
         horOffset -= size.cx - ui::DpiManager::GetInstance()->ScaleInt(offset);
+      }
+    } else {
+      if (m_nPlacement & kPlaceTopLeft ||
+        m_nPlacement & kPlaceBottomLeft) {
+        rc.left = anchorPos.left - m_pPopoverRoot->GetMargin().left;
       }
     }
   }
