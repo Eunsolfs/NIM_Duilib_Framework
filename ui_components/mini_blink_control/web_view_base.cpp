@@ -479,12 +479,11 @@ bool WebViewBase::OnNavigation(wkeWebView webView, wkeNavigationType navigationT
 }
 
 wkeWebView WebViewBase::OnCreateView(wkeWebView webView, wkeNavigationType navigationType, const wkeString url, const wkeWindowFeatures* windowFeatures) {
-  std::wstring url_temp = wkeGetStringW(url);
-  if (m_create_web_view_callback) {
-    return m_create_web_view_callback(navigationType, url_temp, windowFeatures);
-  }
+  const wchar_t* temp_url = wkeGetStringW(url);
 
-  return nullptr;
+  wkeWebView newWindow = wkeCreateWebWindow(WKE_WINDOW_TYPE_POPUP, NULL, windowFeatures->x, windowFeatures->y, windowFeatures->width, windowFeatures->height);
+  wkeShowWindow(newWindow, true);
+  return newWindow;
 }
 
 void WebViewBase::OnLoadingFinish(wkeWebView webView, const wkeString url, wkeLoadingResult result, const wkeString failedReason) {

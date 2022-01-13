@@ -130,8 +130,6 @@ public:
 
   void AttachOnNavigation(const NavigationCallback& callback) { m_navigation_callback = callback; }
 
-  void AttachOnCreateView(const CreateWebViewCallback& callback) { m_create_web_view_callback = callback; }
-
   void AttachOnLoadingFinish(const LoadingFinishCallback& callback) { m_loading_finish_callback = callback; }
 
   void AttachOnLoadUrlBegin(const LoadUrlBeginCallback& callback) { m_load_url_begin_callback = callback; }
@@ -157,7 +155,6 @@ public:
   TitleChangedCallback m_title_changed_callback;
   UrlChangedCallback m_url_changed_callback;
   NavigationCallback m_navigation_callback;
-  CreateWebViewCallback m_create_web_view_callback;
   LoadingFinishCallback m_loading_finish_callback;
   LoadUrlBeginCallback m_load_url_begin_callback;
   LoadUrlEndCallback m_load_url_end_callback;
