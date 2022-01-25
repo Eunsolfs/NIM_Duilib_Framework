@@ -330,6 +330,16 @@ void PopoverHeader::DoInit()
     return;
 
   m_bInited = true;
+
+  if (m_pRichEditTitle) {
+    PARAFORMAT2 pf;
+    ZeroMemory(&pf, sizeof(PARAFORMAT2));
+    pf.cbSize = sizeof(PARAFORMAT2);
+    pf.dwMask |= PFM_LINESPACING;
+    pf.bLineSpacingRule = 4;
+    pf.dyLineSpacing = 15 * 20;
+    m_pRichEditTitle->SetParaFormat(pf);
+  }
 }
 
 void PopoverHeader::UpdateTitle(const std::wstring& strTitle)
