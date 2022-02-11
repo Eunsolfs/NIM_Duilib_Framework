@@ -211,7 +211,7 @@ LRESULT WkeWebView::MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL
     bHandled = wkeFireMouseEvent(m_wke_web_view, uMsg, pWebPt.x, pWebPt.y, flags);
 
     ui::Control* control = m_pWindow->FindControl(pOriginPt);
-    if (bHandled && control != this && control->IsMouseEnabled()) {
+    if (bHandled && control && control != this && control->IsMouseEnabled()) {
       bHandled = false;
     }
   }
