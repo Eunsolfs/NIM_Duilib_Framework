@@ -1367,6 +1367,10 @@ bool PopoverLayer::Remove(Control* pControl)
 
 void PopoverLayer::ClearAll()
 {
+  alert_count = 0;
+  m_bDisableWindow = false;
+  m_pAlertLayer->SetMouseEnabled(false);
+
   for (auto pair : m_NotifyLayerMap)
     pair.second->RemoveAll();
 
