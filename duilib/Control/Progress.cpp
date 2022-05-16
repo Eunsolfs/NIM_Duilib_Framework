@@ -98,6 +98,11 @@ void Progress::SetValue(double nValue)
 
 	m_nValue = nValue;
 
+  if (m_nMin >= 0 || m_nMax >= 0) {
+    m_nValue = max(m_nValue, m_nMin);
+    m_nValue = min(m_nValue, m_nMax);
+  }
+
 	Invalidate();
 }
 
