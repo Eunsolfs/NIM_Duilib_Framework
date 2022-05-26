@@ -1195,7 +1195,8 @@ RichEdit::RichEdit() :
 	m_drawCaretFlag(),
 	m_timeFlagMap(),
 	m_linkInfo(),
-	m_sFocusedImage()
+	m_sFocusedImage(),
+  m_PromptStyle(0)
 {
 	m_iLimitText = cInitTextMax;
 	m_sCurrentColor = GlobalManager::GetDefaultTextColor();
@@ -2851,6 +2852,7 @@ void RichEdit::SetAttribute(const std::wstring& strName, const std::wstring& str
 	else if (strName == _T("returnmsgwantctrl")) SetReturnMsgWantCtrl(strValue == _T("true"));
 	else if (strName == _T("rich")) SetRich(strValue == _T("true"));
 	else if (strName == _T("maxchar")) SetLimitText(_ttoi(strValue.c_str()));
+  else if (strName == _T("promptalign")) SetPromptAlign(strValue);
 	else Box::SetAttribute(strName, strValue);
 }
 
@@ -2998,6 +3000,9 @@ void RichEdit::PaintPromptText(IRenderContext* pRender)
 
 	DWORD dwClrColor = this->GetWindowColor(m_sPromptColor);
 	UINT dwStyle = DT_NOCLIP;
+  if (m_PromptStyle != 0) {
+    dwStyle |= m_PromptStyle;
+  }
 	pRender->DrawText(rc, strPrompt, dwClrColor, m_sFontId, dwStyle);
 }
 
@@ -3181,6 +3186,12 @@ void RichEdit::ClearImageCache()
 	m_sFocusedImage.ClearCache();
 }
 
+
+void RichEdit::SetPromptAlign(const std::wstring& promptAlign) {
+  if (promptAlign.find(L"vcenter") != std::wstring::npos) {
+    m_PromptStyle |= DT_VCENTER;
+  }
+}
 
 void RichEdit::RaiseUIAValueEvent(const std::wstring oldText, const std::wstring newText)
 {

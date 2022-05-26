@@ -916,6 +916,12 @@ public:
 	 */
 	virtual void ClearImageCache() override;
 
+  /**
+   * @brief 设置prompt text align
+   * @return 无
+   */
+  void SetPromptAlign(const std::wstring& promptAlign);
+
 	/**
 	 * @brief 监听回车按键按下事件
 	 * @param[in] callback 回车被按下的自定义回调函数
@@ -994,6 +1000,7 @@ protected:
 	std::wstring m_sText;
 	std::wstring m_sPromptText;
 	std::wstring m_sPromptTextId;
+  LONG m_PromptStyle;
 	nbase::WeakCallbackFlag m_drawCaretFlag;
 	std::weak_ptr<nbase::WeakFlag> m_windowFlag; //记录所属窗体的flag
 	FunGetNaturalSize m_cbGetNaturalSize;
