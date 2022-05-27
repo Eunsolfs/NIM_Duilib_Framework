@@ -48,7 +48,7 @@ void ButtonTemplate<InheritType>::HandleMessage(EventArgs& event)
     }
     if (event.Type == kEventKeyDown) {
         if (this->IsKeyboardEnabled()) {
-            if (event.chKey == VK_SPACE || event.chKey == VK_RETURN) {
+            if (/*event.chKey == VK_SPACE ||*/ event.chKey == VK_RETURN) {
                 Activate();
                 return;
             }
