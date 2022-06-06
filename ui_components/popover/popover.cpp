@@ -551,6 +551,12 @@ void PopoverFooter::DoInit()
   m_bInited = true;
 }
 
+void PopoverFooter::SetOkButtonFocus() {
+  if (m_pButtonOk) {
+    m_pButtonOk->SetFocus();
+  }
+}
+
 // PopoverRoot
 ui::CSize PopoverRoot::EstimateSize(ui::CSize szAvailable)
 {
@@ -1422,8 +1428,17 @@ LRESULT PopoverLayer::MessageHandler(UINT uMsg,
   else if (uMsg == WM_KEYDOWN || uMsg == WM_CHAR) {
     // this will stop any key down or char message to other controls
     // but will not stop other keyboard event lik Escape
-    if (m_bDisableWindow)
-      bHandled = true;
+    if (m_bDisableWindow) {
+      if (wParam == VK_RETURN) {
+        auto popover = static_cast<Popover*>(m_pAlertLayer->GetItemAt(0));
+        if (popover && popover->GetFooter()) {
+          popover->GetFooter()->SetOkButtonFocus();
+        }
+       } else {
+        bHandled = true;
+      }
+    }
+
   }
 
   return 0;

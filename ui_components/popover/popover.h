@@ -228,6 +228,8 @@ public:
   void AttachCancelClicked(const ui::EventCallback& callback) { OnCancel += callback; }
   void AttachOkClicked(const ui::EventCallback& callback) { OnOk += callback; }
 
+  void SetOkButtonFocus();
+
 protected:
   bool m_bInited;
   bool m_bUseMaxSize;
