@@ -310,7 +310,8 @@ bool ListBox::AddAt(Control* pControl, std::size_t iIndex)
 			pListItem->SetIndex(i);
 		}
 	}
-	if( m_iCurSel >= iIndex ) m_iCurSel += 1;
+  if (m_iCurSel >= static_cast<int>(iIndex)) m_iCurSel += 1;
+
 	return true;
 }
 
