@@ -24,6 +24,7 @@ Control::Control() :
 	m_bNeedButtonUpWhenKillFocus(false),
 	m_bAllowTabstop(true),
   m_bIsLoading(false),
+  m_bEllipseBkground(false),
 	m_szEstimateSize(),
 	m_renderOffset(),
 	m_cxyBorderRound(),
@@ -103,6 +104,7 @@ Control::Control(const Control& r) :
 	m_imageMap(r.m_imageMap),
 	m_bkImage(r.m_bkImage),
   m_loadingImage(r.m_loadingImage),
+  m_bEllipseBkground(r.m_bEllipseBkground),
 	m_loadBkImageWeakFlag(),
   m_loadingImageFlag()
 {
@@ -1243,6 +1245,7 @@ void Control::SetAttribute(const std::wstring& strName, const std::wstring& strV
 	else if (strName == _T("tabstop")) SetTabStop(strValue == _T("true"));
   else if (strName == _T("loadingimage")) SetLoadingImage(strValue);
   else if (strName == _T("loadingbkcolor")) SetLoadingBkColor(strValue);
+  else if (strName == _T("ellipsebkground")) SetEllipseBkground(strValue == _T("true"));
 	else {
 	ASSERT(FALSE);
 	}
@@ -1484,7 +1487,11 @@ void Control::AlphaPaint(IRenderContext* pRender, const UiRect& rcPaint)
 	}
 	else {
     PaintShadow(pRender);
-    AutoClip clip(pRender, m_rcItem, m_bClip);
+    ui::UiRect rcClipRect = m_rcItem;
+    rcClipRect.right += 1;
+    rcClipRect.bottom += 1;
+
+    AutoClip clip(pRender, rcClipRect, m_bClip);
     AutoClip roundClip(pRender, m_rcItem, m_cxyBorderRound.cx, m_cxyBorderRound.cy, bRoundClip);
 		CPoint ptOldOrg = pRender->OffsetWindowOrg(m_renderOffset);
 		Paint(pRender, rcPaint);
@@ -1529,8 +1536,13 @@ void Control::PaintBkColor(IRenderContext* pRender)
 
 	DWORD dwBackColor = this->GetWindowColor(m_strBkColor);
 	if(dwBackColor != 0) {
-		if (dwBackColor >= 0xFF000000) pRender->DrawColor(m_rcPaint, dwBackColor);
-		else pRender->DrawColor(m_rcItem, dwBackColor);
+    if (m_bEllipseBkground) {
+      pRender->FillEllipse(m_rcPaint, dwBackColor);
+    }
+    else {
+      if (dwBackColor >= 0xFF000000) pRender->DrawColor(m_rcPaint, dwBackColor);
+      else pRender->DrawColor(m_rcItem, dwBackColor);
+    }
 	}
 }
 
@@ -1965,6 +1977,10 @@ void Control::Loading() {
 
 bool Control::IsLoading()  {
   return m_bIsLoading;
+}
+
+void Control::SetEllipseBkground(bool bEllipseBkground) {
+  m_bEllipseBkground = bEllipseBkground;
 }
 
 } // namespace ui

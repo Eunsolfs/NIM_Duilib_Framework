@@ -2309,6 +2309,8 @@ void RichEdit::SetPos(UiRect rc)
         rc.bottom -= m_pHorizontalScrollBar->GetFixedHeight();
     }
 
+    int iOldLines = GetLineCount();
+
     if( m_pTwh ) {
         m_pTwh->SetClientRect(&rc);
         if( bVScrollBarVisiable && (!m_pVerticalScrollBar->IsValid() || m_bVScrollBarFixing) ) {
@@ -2337,6 +2339,11 @@ void RichEdit::SetPos(UiRect rc)
                 }
             }
         }
+    }
+
+    int iNewLines = GetLineCount();
+    if (iOldLines != iNewLines && m_pWindow) {
+      m_pWindow->SendNotify(this, kEventTextLinesChange);
     }
 
     if( m_pVerticalScrollBar != NULL && m_pVerticalScrollBar->IsValid() ) {

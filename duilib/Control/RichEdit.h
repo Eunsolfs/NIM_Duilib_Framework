@@ -957,6 +957,13 @@ public:
 	 */
 	void AttachGetNaturalSize(const FunGetNaturalSize& callback) { m_cbGetNaturalSize = callback; };
 
+  /**
+ * @brief 监听文本行数发生变化事件
+ * @param[in] callback 行数大小被改变后的自定义回调函数
+ * @return 无
+ */
+  void AttachTextLinesChange(const EventCallback& callback) { OnEvent[kEventTextLinesChange] += callback; };
+
 	/**
 	 * @brief 通知控件值发生变化
 	 * @param[in] oldText 旧值

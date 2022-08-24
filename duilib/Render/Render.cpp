@@ -658,6 +658,20 @@ void RenderContext_GdiPlus::FillEllipse(const UiRect& rc, DWORD dwColor)
 	graphics.FillEllipse(&brush, rc.left, rc.top, rc.GetWidth(), rc.GetHeight());
 }
 
+void RenderContext_GdiPlus::DrawCircle(const UiRect& rc, int nSize, DWORD dwColor) {
+  Gdiplus::Graphics graphics(m_hDC);
+  graphics.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
+  Gdiplus::Pen pen(dwColor, nSize);
+  graphics.DrawArc(&pen, rc.left, rc.top, rc.GetWidth(), rc.GetHeight(), 0, 360);
+}
+
+void RenderContext_GdiPlus::FillCircle(const UiRect& rc, DWORD dwColor) {
+  Gdiplus::Graphics graphics(m_hDC);
+  graphics.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
+  Gdiplus::SolidBrush brush(dwColor);
+  graphics.FillPie(&brush, rc.left, rc.top, rc.GetWidth(), rc.GetHeight(), 0, 360);
+}
+
 void RenderContext_GdiPlus::DrawPath(const IPath* path, const IPen* pen)
 {
 	Gdiplus::Graphics graphics(m_hDC);

@@ -62,6 +62,9 @@ public:
 	virtual void DrawEllipse(const UiRect& rc, int nSize, DWORD dwColor) override;
 	virtual void FillEllipse(const UiRect& rc, DWORD dwColor) override;
 
+  virtual void DrawCircle(const UiRect& rc, int nSize, DWORD dwColor) override;
+  virtual void FillCircle(const UiRect& rc, DWORD dwColor) override;
+
 	virtual UiRect MeasureText(const std::wstring& strText, const std::wstring& strFontId, UINT uStyle, int width = DUI_NOSET_VALUE) override;
 
 	virtual void DrawPath(const IPath* path, const IPen* pen) override;

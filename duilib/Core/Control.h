@@ -866,6 +866,13 @@ public:
   */
   virtual bool IsLoading();
 
+  /**
+  * @brief 设置椭圆背景
+  * @param[in] bEllipseBkground 是否设置椭圆背景
+  * @return 无
+  */
+  virtual void SetEllipseBkground(bool bEllipseBkground);
+
 	/// 动画管理
 	/**
 	 * @brief 获取动画管理器指针
@@ -1066,6 +1073,7 @@ protected:
 	bool m_bNeedButtonUpWhenKillFocus;
 	bool m_bAllowTabstop;
   bool m_bIsLoading;
+  bool m_bEllipseBkground;
 	int m_nBorderSize;
 	int m_nTooltipWidth;
 	int m_nAlpha;

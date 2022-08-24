@@ -134,6 +134,7 @@ enum EventType
 	kEventReturn,
 	kEventTab,
 	kEventCustomLinkClick,
+  kEventTextLinesChange,
 
 	kEventImeStartComposition,
 	kEventImeEndComposition,

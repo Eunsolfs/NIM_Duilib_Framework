@@ -218,6 +218,9 @@ public:
 	virtual void DrawEllipse(const UiRect& rc, int nSize, DWORD dwColor) = 0;
 	virtual void FillEllipse(const UiRect& rc, DWORD dwColor) = 0;
 
+  virtual void DrawCircle(const UiRect& rc, int nSize, DWORD dwColor) = 0;
+  virtual void FillCircle(const UiRect& rc, DWORD dwColor) = 0;
+
 	virtual UiRect MeasureText(const std::wstring& strText, const std::wstring& strFontId, UINT uStyle, int width = DUI_NOSET_VALUE) = 0;
 
 	virtual void DrawPath(const IPath* path, const IPen* pen) = 0;
