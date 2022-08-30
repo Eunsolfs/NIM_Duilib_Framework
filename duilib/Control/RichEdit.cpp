@@ -1196,7 +1196,8 @@ RichEdit::RichEdit() :
 	m_timeFlagMap(),
 	m_linkInfo(),
 	m_sFocusedImage(),
-  m_PromptStyle(0)
+  m_PromptStyle(0),
+  m_iLineCount(0)
 {
 	m_iLimitText = cInitTextMax;
 	m_sCurrentColor = GlobalManager::GetDefaultTextColor();
@@ -2309,8 +2310,6 @@ void RichEdit::SetPos(UiRect rc)
         rc.bottom -= m_pHorizontalScrollBar->GetFixedHeight();
     }
 
-    int iOldLines = GetLineCount();
-
     if( m_pTwh ) {
         m_pTwh->SetClientRect(&rc);
         if( bVScrollBarVisiable && (!m_pVerticalScrollBar->IsValid() || m_bVScrollBarFixing) ) {
@@ -2341,8 +2340,9 @@ void RichEdit::SetPos(UiRect rc)
         }
     }
 
-    int iNewLines = GetLineCount();
-    if (iOldLines != iNewLines && m_pWindow) {
+    int iOldLines = m_iLineCount;
+    m_iLineCount = GetLineCount();
+    if (iOldLines != m_iLineCount && m_pWindow) {
       m_pWindow->SendNotify(this, kEventTextLinesChange);
     }
 

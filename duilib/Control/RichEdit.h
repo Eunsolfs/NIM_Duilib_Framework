@@ -997,6 +997,7 @@ protected:
 	int  m_iCaretHeight;
 	std::wstring m_sFontId;
 	int  m_iLimitText;
+  int  m_iLineCount;
 	LONG m_lTwhStyle;
 	VerAlignType m_textVerAlignType;
 	std::wstring m_sCurrentColor;
