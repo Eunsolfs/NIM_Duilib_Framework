@@ -251,7 +251,7 @@ public:
 	 * @param[in] cxyRound 一个 CSize 结构表示了四个方向边框的大小
 	 * @return 无
 	 */
-	void SetBorderRound(CSize cxyRound);
+	void SetBorderRound(CSize cxyRound, bool bNeedDpiScale = true);
 
 	/**
 	 * @brief 设置边框阴影
@@ -1043,6 +1043,7 @@ protected:
 	virtual void PaintText(IRenderContext* pRender);
 	virtual void PaintBorder(IRenderContext* pRender);
   virtual void PaintLoading(IRenderContext* pRender);
+  virtual void PaintRoundBkColor(IRenderContext* pRender);
 
 	/**
 	* @brief 获取某个颜色对应的值，优先获取窗口颜色

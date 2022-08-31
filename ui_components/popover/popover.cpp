@@ -843,6 +843,34 @@ void Popover::UpdateDisappearType(int nType, int nTimeouts)
   m_nDisappearType = nType;
 }
 
+void Popover::SetXOffset(int offset, bool bNeedDpiScale) {
+  if (bNeedDpiScale) {
+    offset = ui::DpiManager::GetInstance()->ScaleInt(offset);
+  }
+
+  if (m_nXOffset == offset) {
+    return;
+  }
+
+  m_nXOffset = offset;
+
+  ArrangeSelf();
+}
+
+void Popover::SetYOffset(int offset, bool bNeedDpiScale) {
+  if (bNeedDpiScale) {
+    offset = ui::DpiManager::GetInstance()->ScaleInt(offset);
+  }
+
+  if (m_nYOffset == offset) {
+    return;
+  }
+
+  m_nYOffset = offset;
+
+  ArrangeSelf();
+}
+
 ui::HorAlignType Popover::GetHorAlignType()
 {
   if (m_nPlacement & kPlaceLeft ||
@@ -886,8 +914,8 @@ ui::UiRect Popover::ReCalcByAnchorPos(ui::UiRect rc)
   auto anchorPos = m_pAnchor->GetPos();
   auto size = EstimateSize({ 0,0 });
 
-  int verOffset = 0;
-  int horOffset = 0;
+  int verOffset = m_nYOffset;
+  int horOffset = m_nXOffset;
 
   bool bHasArrow = (m_pPopoverArrow != nullptr);
   bool bIsInner = (m_nPlacement & kPlaceInner);

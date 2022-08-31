@@ -314,6 +314,9 @@ public:
   // ¼àÌý¹Ø±Õ»Øµ÷
   void BindCloseCallback(const PopoverCallback& callback) { m_cbClose += callback; }
 
+  void SetXOffset(int offset, bool bNeedDpiScale = true);
+  void SetYOffset(int offset, bool bNeedDpiScale = true);
+
 protected:
   ui::HorAlignType GetHorAlignType();
   ui::VerAlignType GetVerAlignType();
@@ -364,6 +367,9 @@ protected:
 
   std::atomic<int> m_nShowTriggerIndex;
   std::atomic<int> m_nDisappearTriggerIndex;
+
+  int m_nXOffset;
+  int m_nYOffset;
 
   PopoverRoot* m_pPopoverRoot;
   PopoverHeader* m_pPopoverHeader;

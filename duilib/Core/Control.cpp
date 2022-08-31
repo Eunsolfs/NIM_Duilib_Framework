@@ -373,11 +373,14 @@ CSize Control::GetBorderRound() const
     return m_cxyBorderRound;
 }
 
-void Control::SetBorderRound(CSize cxyRound)
+void Control::SetBorderRound(CSize cxyRound, bool bNeedDpiScale)
 {
-	DpiManager::GetInstance()->ScaleSize(cxyRound);
-    m_cxyBorderRound = cxyRound;
-    Invalidate();
+  if (bNeedDpiScale) {
+    DpiManager::GetInstance()->ScaleSize(cxyRound);
+  }
+
+  m_cxyBorderRound = cxyRound;
+  Invalidate();
 }
 
 void Control::SetBoxShadow(const std::wstring& strShadow)
@@ -1488,8 +1491,6 @@ void Control::AlphaPaint(IRenderContext* pRender, const UiRect& rcPaint)
 	else {
     PaintShadow(pRender);
     ui::UiRect rcClipRect = m_rcItem;
-    rcClipRect.right += 1;
-    rcClipRect.bottom += 1;
 
     AutoClip clip(pRender, rcClipRect, m_bClip);
     AutoClip roundClip(pRender, m_rcItem, m_cxyBorderRound.cx, m_cxyBorderRound.cy, bRoundClip);
@@ -1537,7 +1538,7 @@ void Control::PaintBkColor(IRenderContext* pRender)
 	DWORD dwBackColor = this->GetWindowColor(m_strBkColor);
 	if(dwBackColor != 0) {
     if (m_bEllipseBkground) {
-      pRender->FillEllipse(m_rcPaint, dwBackColor);
+      PaintRoundBkColor(pRender);
     }
     else {
       if (dwBackColor >= 0xFF000000) pRender->DrawColor(m_rcPaint, dwBackColor);
@@ -1709,6 +1710,37 @@ void Control::PaintLoading(IRenderContext* pRender) {
       Gdiplus::UnitPixel);
 
   delete image;
+}
+
+void Control::PaintRoundBkColor(IRenderContext* pRender) {
+  int width = GetPos().GetWidth();
+  int height = GetPos().GetHeight();
+
+  DWORD dwBackColor = this->GetWindowColor(m_strBkColor);
+
+  if (width == height) {
+    pRender->FillCircle(m_rcItem, dwBackColor);
+
+    return;
+  }
+
+  Path_Gdiplus path;
+  int radius = 0;
+
+  if (width > height) {
+    radius = height / 2;
+    path.AddArc(m_rcItem.left, m_rcItem.top, height, height, 90, 180);
+    path.AddArc(m_rcItem.right - height - 1, m_rcItem.top, height, height, 270, 180);
+    path.CloseFigure();
+  } else {
+    radius = width / 2;
+    path.AddArc(m_rcItem.left, m_rcItem.top, width, width, 180, 180);
+    path.AddArc(m_rcItem.left , m_rcItem.bottom - width - 1, width, width, 0, 180);
+    path.CloseFigure();
+  }
+
+  Brush_Gdiplus brush(dwBackColor);
+  pRender->FillPath(&path, &brush);
 }
 
 void Control::SetAlpha(int alpha)
