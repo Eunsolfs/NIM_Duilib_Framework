@@ -76,7 +76,9 @@ enum PopoverIconType {
   /* 警告 */
   kIconWarning,
   /* 错误 */
-  kIconError
+  kIconError,
+  /* 成功 */
+  kIconSuccess,
 };
 
 /* 默认按钮 */

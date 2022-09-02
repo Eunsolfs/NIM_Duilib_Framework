@@ -208,8 +208,10 @@ PopoverHeader::PopoverHeader(
       m_pControlIcon->SetClass(L"popover_icon popover_icon_info");
     else if (m_nIconType == kIconWarning)
       m_pControlIcon->SetClass(L"popover_icon popover_icon_warning");
-    if (m_nIconType == kIconError)
+    else if (m_nIconType == kIconError)
       m_pControlIcon->SetClass(L"popover_icon popover_icon_error");
+    else if (m_nIconType == kIconSuccess)
+      m_pControlIcon->SetClass(L"popover_icon popover_icon_success");
 
     m_pControlIcon->SetVisible(true);
     Add(m_pControlIcon);
