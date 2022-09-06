@@ -15,8 +15,11 @@ void CShadowComboWnd::Init(ShadowCombo* pOwner) {
   CSize szDrop = m_pOwner->GetDropBoxSize();
   UiRect rcOwner = pOwner->GetPosWithScrollOffset();
   int iItemHeight = m_iOldSel > -1 ? pOwner->GetItemAt(m_iOldSel)->GetFixedHeight() : 0;
-  int iOffset = iItemHeight * (m_iOldSel + 1);
+  int iOffset =iItemHeight * (m_iOldSel + 1);
   iOffset = max(iOffset, 0);
+  if (iOffset > szDrop.cy) {
+    iOffset = iItemHeight;
+  }
   int iScrollPos = pOwner->GetCustomLayout()->GetScrollPos().cy;
   if (iScrollPos > iItemHeight) {
     iOffset = iItemHeight;
@@ -127,7 +130,7 @@ LRESULT CShadowComboWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     if (m_hWnd != (HWND)wParam) {
       m_bClosing = true;
       PostMessage(WM_CLOSE);
-      m_pOwner->SelectItemInternal(m_pOwner->GetListBox()->GetCurSel());
+      m_pOwner->SelectItemInternal(m_pOwner->GetListBox()->GetCurSel(),  true);
       ((Box*)this->GetRoot())->RemoveAt(0);
       m_pOwner->GetListBox()->PlaceHolder::SetWindow(nullptr, nullptr, false);
     }
@@ -323,6 +326,14 @@ void ShadowCombo::SetAttribute(const std::wstring& strName, const std::wstring& 
     m_cArrow->SetStateImage(kControlStateDisabled, strValue);
   } else if (strName == _T("arrowoffset")) {
     SetArrowOffset(_ttoi(strValue.c_str()));
+  } else if (strName == _T("normalbordercolor")) {
+    SetBorderColor(ui::kControlStateNormal, strValue);
+  } else if (strName == _T("hotbordercolor")) {
+    SetBorderColor(ui::kControlStateHot, strValue);
+  } else if (strName == _T("pushedbordercolor")) {
+    SetBorderColor(ui::kControlStatePushed, strValue);
+  } else if (strName == _T("disabledbordercolor")) {
+    SetBorderColor(ui::kControlStateDisabled, strValue);
   }
 
   else Box::SetAttribute(strName, strValue);
@@ -377,6 +388,78 @@ void ShadowCombo::PaintChild(IRenderContext* pRender, const UiRect& rcPaint) {
   m_cArrow->Paint(pRender, rcPaint);
 }
 
+void ShadowCombo::PaintBorder(IRenderContext* pRender) {
+  DWORD dwBorderColor = 0;
+  if (!m_strBorderColor.empty()) {
+    dwBorderColor = this->GetWindowColor(m_strBorderColor);
+  }
+
+  if (dwBorderColor == 0 && !m_borderColorMap[GetState()].empty()) {
+    dwBorderColor = GetWindowColor(m_borderColorMap[GetState()]);
+  }
+
+  if (dwBorderColor != 0) {
+    if (m_rcBorderSize.left > 0 || m_rcBorderSize.top > 0 || m_rcBorderSize.right > 0 || m_rcBorderSize.bottom > 0) {
+      UiRect rcBorder;
+      if (m_rcBorderSize.left > 0) {
+        rcBorder = m_rcItem;
+        rcBorder.right = rcBorder.left = m_rcItem.left + m_rcBorderSize.left / 2;
+        if (m_rcBorderSize.left == 1) {
+          rcBorder.bottom -= 1;
+        }
+        pRender->DrawLine(rcBorder, m_rcBorderSize.left, dwBorderColor);
+      }
+      if (m_rcBorderSize.top > 0) {
+        rcBorder = m_rcItem;
+        rcBorder.bottom = rcBorder.top = m_rcItem.top + m_rcBorderSize.top / 2;
+        if (m_rcBorderSize.top == 1) {
+          rcBorder.right -= 1;
+        }
+        pRender->DrawLine(rcBorder, m_rcBorderSize.top, dwBorderColor);
+      }
+      if (m_rcBorderSize.right > 0) {
+        rcBorder = m_rcItem;
+        rcBorder.left = rcBorder.right = m_rcItem.right - (m_rcBorderSize.right + 1) / 2;
+        if (m_rcBorderSize.right == 1) {
+          rcBorder.bottom -= 1;
+        }
+        pRender->DrawLine(rcBorder, m_rcBorderSize.right, dwBorderColor);
+      }
+      if (m_rcBorderSize.bottom > 0) {
+        rcBorder = m_rcItem;
+        rcBorder.top = rcBorder.bottom = m_rcItem.bottom - (m_rcBorderSize.bottom + 1) / 2;
+        if (m_rcBorderSize.bottom == 1) {
+          rcBorder.right -= 1;
+        }
+        pRender->DrawLine(rcBorder, m_rcBorderSize.bottom, dwBorderColor);
+      }
+    }
+    else if (m_nBorderSize > 0) {
+      UiRect rcDraw = m_rcItem;
+      int nDeltaValue = m_nBorderSize / 2;
+      rcDraw.top += nDeltaValue;
+      rcDraw.bottom -= nDeltaValue;
+      if (m_nBorderSize % 2 != 0) {
+        rcDraw.bottom -= 1;
+      }
+      rcDraw.left += nDeltaValue;
+      rcDraw.right -= nDeltaValue;
+      if (m_nBorderSize % 2 != 0) {
+        rcDraw.right -= 1;
+      }
+
+      if (m_cxyBorderRound.cx > 0 || m_cxyBorderRound.cy > 0)
+        pRender->DrawRoundRect(rcDraw, m_cxyBorderRound, m_nBorderSize, dwBorderColor);
+      else
+        pRender->DrawRect(rcDraw, m_nBorderSize, dwBorderColor);
+    }
+  }
+}
+
+bool ShadowCombo::HasHotState() {
+  return __super::HasHotState() || m_borderColorMap.HasHotColor();
+}
+
 std::wstring ShadowCombo::GetText() const
 {
   if (m_iCurSel < 0) return _T("");
@@ -418,9 +501,9 @@ void ShadowCombo::SetDropBoxSize(CSize szDropBox)
   m_szDropBox = szDropBox;
 }
 
-bool ShadowCombo::SelectItemInternal(int iIndex)
+bool ShadowCombo::SelectItemInternal(int iIndex, bool bTrigger)
 {
-  if (iIndex < 0 || iIndex >= m_pLayout->GetCount())
+  if (iIndex < 0 || iIndex >= m_pLayout->GetCount() || iIndex == m_iCurSel)
     return false;
 
   int iOldSel = m_iCurSel;
@@ -428,7 +511,7 @@ bool ShadowCombo::SelectItemInternal(int iIndex)
   m_pLayout->SelectItem(m_iCurSel, false, false);
 
   //add by djj below
-  if (m_pWindow != NULL) {
+  if (m_pWindow != NULL && bTrigger) {
     m_pWindow->SendNotify(this, kEventSelect, m_iCurSel, iOldSel);
   }
 
@@ -450,13 +533,7 @@ bool ShadowCombo::SelectItemInternal(int iIndex)
 }
 bool ShadowCombo::SelectItem(int iIndex, bool bTrigger)
 {
-  m_pLayout->SelectItem(iIndex, false, false);
-  if (!SelectItemInternal(iIndex))
-    return false;
-  Invalidate();
-  if (m_pWindow != NULL && bTrigger) {
-    m_pWindow->SendNotify(this, kEventSelect, m_iCurSel, -1);
-  }
+  SelectItemInternal(iIndex, bTrigger);
   return true;
 }
 
@@ -494,6 +571,18 @@ void ShadowCombo::SetArrowOffset(int offset, bool bNeedDpiScale) {
     ui::DpiManager::GetInstance()->ScaleInt(offset);
   }
   m_iArrowOffset = offset;
+}
+
+void ShadowCombo::SetBorderColor(ControlStateType stateType, const std::wstring& strColor) {
+  ASSERT(this->GetWindowColor(strColor) != 0);
+  if (m_borderColorMap[stateType] == strColor) return;
+
+  m_borderColorMap[stateType] = strColor;
+  Invalidate();
+}
+
+std::wstring ShadowCombo::GetBorderColor(ControlStateType stateType) {
+  return m_borderColorMap[stateType];
 }
 
 }

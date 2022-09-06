@@ -51,6 +51,7 @@ public:
 	virtual void EnsureVisible(const UiRect& rcItem) override;
 	virtual void StopScroll() override;
 	virtual bool ButtonDown(EventArgs& msg) override;
+  virtual void SetPos(UiRect rc) override;
 
 	/**
 	 * @brief 滚动到指定子项位置

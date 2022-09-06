@@ -193,6 +193,19 @@ bool ListBox::ButtonDown(EventArgs& msg)
 	return ret;
 }
 
+void ListBox::SetPos(UiRect rc) {
+  ui::UiRect old_pos = GetPos();
+
+  ScrollableBox::SetPos(rc);
+
+  if (old_pos.IsRectEmpty() && m_iCurSel != -1) {
+    if (GetItemAt(m_iCurSel)) {
+      UiRect rcItem = GetItemAt(m_iCurSel)->GetPos();
+      EnsureVisible(rcItem);
+    }
+  }
+}
+
 bool ListBox::ScrollItemToTop(const std::wstring& strItemName)
 {
 	for (auto it = m_items.begin(); it != m_items.end(); it++) {

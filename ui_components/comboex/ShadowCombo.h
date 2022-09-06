@@ -48,6 +48,8 @@ public:
   void SetAttribute(const std::wstring& strName, const std::wstring& strValue) override;
   void PaintText(IRenderContext* pRender) override;
   void PaintChild(IRenderContext* pRender, const UiRect& rcPaint) override;
+  void PaintBorder(IRenderContext* pRender) override;
+  bool HasHotState() override;
 
   /**
    * @brief 获取当前选择项文本
@@ -182,7 +184,23 @@ public:
   */
   ui::ListBox* GetCustomLayout() const { return m_pLayout.get(); }
 
+  /**
+  * @brief 设置arrow的offset
+  * @return 无
+  */
   void SetArrowOffset(int offset, bool bNeedDpiScale = true);
+
+  /**
+  * @brief 设置不同状态下border的颜色
+  * @return 无
+  */
+  void SetBorderColor(ControlStateType stateType, const std::wstring& strColor);
+
+  /**
+  * @brief 获取不同状态下border的颜色
+  * @return 返回border的颜色
+  */
+  std::wstring GetBorderColor(ControlStateType stateType);
 
   /**
    * @brief 监听子项被选择事件
@@ -211,7 +229,7 @@ private:
    * @param[in] iIndex 要选择的子项索引
    * @return 返回 true 表示成功，否则为 false
    */
-  bool SelectItemInternal(int iIndex);
+  bool SelectItemInternal(int iIndex, bool bTrigger);
 
 protected:
   CShadowComboWnd* m_pWindow;
@@ -226,6 +244,7 @@ protected:
   ui::Control* m_cArrow;
   bool m_bInit;
   int m_iArrowOffset;
+  StateColorMap m_borderColorMap;
 };
 
 }
