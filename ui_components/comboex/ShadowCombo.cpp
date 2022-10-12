@@ -132,7 +132,7 @@ LRESULT CShadowComboWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
       PostMessage(WM_CLOSE);
       m_pOwner->SelectItemInternal(m_pOwner->GetListBox()->GetCurSel(),  true);
       ((Box*)this->GetRoot())->RemoveAt(0);
-      m_pOwner->GetListBox()->PlaceHolder::SetWindow(nullptr, nullptr, false);
+      m_pOwner->GetListBox()->SetWindow(nullptr, nullptr, false);
     }
   }
 
@@ -167,7 +167,6 @@ ShadowCombo::ShadowCombo()
 
   m_pLayout.reset(new ListBox(new VLayout));
   m_pLayout->SetBkColor(L"white");
-  m_pLayout->SetAutoDestroyChild(false);
   m_pLayout->EnableScrollBar();
   m_pLayout->ApplyAttributeList(GetDropBoxAttributeList());
   m_pLayout->AttachSelect(nbase::Bind(&ShadowCombo::OnSelectItem, this, std::placeholders::_1));

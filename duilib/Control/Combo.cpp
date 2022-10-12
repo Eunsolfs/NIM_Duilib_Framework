@@ -121,7 +121,7 @@ LRESULT CComboWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			PostMessage(WM_CLOSE);
 			m_pOwner->SelectItemInternal(m_pOwner->GetListBox()->GetCurSel());
 			((Box*)this->GetRoot())->RemoveAt(0);
-			m_pOwner->GetListBox()->PlaceHolder::SetWindow(nullptr, nullptr, false);
+			m_pOwner->GetListBox()->SetWindow(nullptr, nullptr, false);
 		}
     }
 
@@ -160,7 +160,6 @@ Combo::Combo() :
 	m_pLayout->SetBorderSize(UiRect(1, 1, 1, 1));
 	m_pLayout->SetBkColor(L"white");
 	m_pLayout->SetBorderColor(L"gray");
-	m_pLayout->SetAutoDestroyChild(false);
 	m_pLayout->EnableScrollBar();
 	m_pLayout->ApplyAttributeList(GetDropBoxAttributeList());
 	m_pLayout->AttachSelect(nbase::Bind(&Combo::OnSelectItem, this, std::placeholders::_1));

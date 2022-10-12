@@ -111,7 +111,7 @@ LRESULT CFilterComboWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			PostMessage(WM_CLOSE);
 			m_pOwner->SelectItem(m_pOwner->GetListBox()->GetCurSel());
 			((Box*)this->GetRoot())->RemoveAt(0);
-			m_pOwner->GetListBox()->PlaceHolder::SetWindow(nullptr, nullptr, false);
+			m_pOwner->GetListBox()->SetWindow(nullptr, nullptr, false);
 			m_pOwner->GetListBox()->SetFilterComboWnd(nullptr);
 		}
     }
@@ -259,7 +259,6 @@ FilterCombo::FilterCombo() :
 	m_pLayout->SetBkColor(L"bk_wnd_lightcolor");
 	m_pLayout->SetBorderColor(L"splitline_level1");
 	m_pLayout->SetBorderSize(UiRect(1, 1, 1, 1));
-	m_pLayout->SetAutoDestroyChild(false);
 	m_pLayout->EnableScrollBar();
 	m_pLayout->ApplyAttributeList(GetDropBoxAttributeList());
 	m_pLayout->AttachSelect(nbase::Bind(&FilterCombo::OnSelectItem, this, std::placeholders::_1));
