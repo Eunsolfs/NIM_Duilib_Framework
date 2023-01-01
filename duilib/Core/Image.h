@@ -16,8 +16,10 @@ public:
 
 	void SetAlpha(bool bAlphaChannel) {	m_bAlphaChannel = bAlphaChannel; }
 	bool IsAlpha() { return m_bAlphaChannel; }
-	bool IsCached()	{ return m_bCached; }
 	void SetCached(bool bCached) { m_bCached = bCached; }
+	bool IsCached() { return m_bCached; }
+	void SetSvg(bool svg) { m_bSvg = svg; }
+	bool IsSvg() { return m_bSvg; }
 
 	void SetPropertyItem(Gdiplus::PropertyItem* pPropertyItem);
 
@@ -28,7 +30,7 @@ public:
 	int GetInterval(int nIndex); //毫秒为单位 
 	 
 	static std::unique_ptr<ImageInfo> LoadImage(const std::wstring& strImageFullPath);
-	static std::unique_ptr<ImageInfo> LoadImage(HGLOBAL hGlobal, const std::wstring& imageFullPath);
+	static std::unique_ptr<ImageInfo> LoadImage(HGLOBAL hGlobal, const std::wstring& strImageFullPath);
 
 private:
 	static std::unique_ptr<ImageInfo> LoadImageByBitmap(std::unique_ptr<Gdiplus::Bitmap>& pGdiplusBitmap, const std::wstring& imageFullPath);
@@ -39,8 +41,9 @@ public:
 	std::wstring sImageFullPath;
 
 private:
-	bool m_bAlphaChannel;
-	bool m_bCached;
+	bool m_bAlphaChannel = false;
+	bool m_bCached = false;
+	bool m_bSvg = false;
 	std::unique_ptr<Gdiplus::PropertyItem> m_propertyItem;
 	std::vector<HBITMAP> m_vecBitmap;
 };
@@ -61,7 +64,10 @@ public:
 	UiRect rcCorner;
 	BYTE bFade;
 	bool bTiledX;
+	bool bFullTiledX;
 	bool bTiledY;
+	bool bFullTiledY;
+	int nTiledMargin;
 	int nPlayCount;//如果是GIF可以指定播放次数 -1 ：一直播放，缺省值。
 };
 
@@ -103,6 +109,7 @@ public:
 	Image& operator[](ControlStateType stateType) {	return m_stateImageMap[stateType]; }
 
 	bool HasHotImage();
+	bool HasImage();
 	bool PaintStatusImage(IRenderContext* pRender, ControlStateType stateType, const std::wstring& sImageModify = L"");
 	Image* GetEstimateImage();
 	void ClearCache();
@@ -123,6 +130,7 @@ public:
 	std::wstring GetImagePath(StateImageType stateImageType, ControlStateType stateType);
 
 	bool HasHotImage();
+	bool HasImageType(StateImageType stateImageType);
 	bool PaintStatusImage(IRenderContext* pRender, StateImageType stateImageType, ControlStateType stateType, const std::wstring& sImageModify = L"");
 	Image* GetEstimateImage(StateImageType stateImageType);
 
@@ -141,6 +149,7 @@ public:
 	std::wstring& operator[](ControlStateType stateType) { return m_stateColorMap[stateType]; }
 
 	bool HasHotColor();
+	bool HasColor();
 	void PaintStatusColor(IRenderContext* pRender, UiRect rcPaint, ControlStateType stateType);
 
 private:

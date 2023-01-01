@@ -21,7 +21,7 @@ public:
 	RichEdit();
 	RichEdit(const RichEdit& r) = delete;
 	RichEdit& operator=(const RichEdit& r) = delete;
-    ~RichEdit();
+    virtual ~RichEdit();
 
 	/**
 	 * @brief 判断是否接受 TAB 按键消息
@@ -133,10 +133,11 @@ public:
 	 * @param[in] nSize 字体大小
 	 * @param[in] bBold 是否粗体显示
 	 * @param[in] bUnderline 是否带有下划线
+	 * @param[in] bStrikeout 是否带有删除线
 	 * @param[in] bItalic 是否斜体显示
 	 * @return 无
 	 */
-    void SetFont(const std::wstring& pStrFontName, int nSize, bool bBold, bool bUnderline, bool bItalic);
+	void SetFont(const std::wstring& pStrFontName, int nSize, bool bBold, bool bUnderline, bool bStrikeout, bool bItalic);
 
 	/**
 	 * @brief 获取窗口样式
@@ -170,6 +171,7 @@ public:
 	 * @return 返回当前文本颜色
 	 */
 	std::wstring GetTextColor();
+	DWORD GetTextColorValue();
 
 	/**
 	 * @brief 获取限制字符数量
@@ -597,6 +599,8 @@ public:
     virtual bool OnTxTextChanged();
 	ITextHost* GetTextHost();
 	ITextServices* GetTextServices();
+	HWND GetWindowHandle();
+	HDC GetWindowDC();
 	BOOL SetOleCallback(IRichEditOleCallback* pCallback);
 	CSize GetNaturalSize(LONG width, LONG height);
 	void SetImmStatus(BOOL bOpen);
@@ -682,9 +686,12 @@ public:
 	 */
     void EndRight();
 
+	virtual std::wstring GetType() const override;
+	virtual UIAControlProvider* GetUIAProvider() override;
 	virtual void DoInit() override;
 	virtual void SetEnabled(bool bEnable = true) override;
 	virtual CSize EstimateSize(CSize szAvailable) override;
+	virtual CSize EstimateText(CSize szAvailable);
 	virtual void SetPos(UiRect rc) override;
 	virtual UINT GetControlFlags() const override;
 	virtual void HandleMessage(EventArgs& event) override;
@@ -887,6 +894,15 @@ public:
 	void AddLinkInfo(const CHARRANGE cr, const std::wstring &linkInfo);
 
 	/**
+	 * @brief 添加一个范围用于 hittest 判断是否是链接信息,并将该范围内文字样式改为系统链接样式
+	 * @param[in] str 文字内容
+	 * @param[in] cr 范围的起始位置和结束位置
+	 * @param[in] linkInfo 自定义 link 属性
+	 * @return 无
+	 */
+	void AddLinkInfoEx(const CHARRANGE cr, const std::wstring& linkInfo);
+
+	/**
 	 * @brief 根据point来hittest自定义link的数据
 	 * @param[in] pt 位置信息
 	 * @param[in] info 表示 link 的自定义属性
@@ -899,6 +915,12 @@ public:
 	 * @return 无
 	 */
 	virtual void ClearImageCache() override;
+
+  /**
+   * @brief 设置prompt text align
+   * @return 无
+   */
+  void SetPromptAlign(const std::wstring& promptAlign);
 
 	/**
 	 * @brief 监听回车按键按下事件
@@ -934,6 +956,22 @@ public:
 	 * @return 无
 	 */
 	void AttachGetNaturalSize(const FunGetNaturalSize& callback) { m_cbGetNaturalSize = callback; };
+
+  /**
+ * @brief 监听文本行数发生变化事件
+ * @param[in] callback 行数大小被改变后的自定义回调函数
+ * @return 无
+ */
+  void AttachTextLinesChange(const EventCallback& callback) { OnEvent[kEventTextLinesChange] += callback; };
+
+	/**
+	 * @brief 通知控件值发生变化
+	 * @param[in] oldText 旧值
+	 * @param[in] newText 新值
+	 * @return 无
+	 */
+	void RaiseUIAValueEvent(const std::wstring oldText, const std::wstring newText);
+
 protected:
     CTxtWinHost* m_pTwh;
     bool m_bVScrollBarFixing;
@@ -959,6 +997,7 @@ protected:
 	int  m_iCaretHeight;
 	std::wstring m_sFontId;
 	int  m_iLimitText;
+  int  m_iLineCount;
 	LONG m_lTwhStyle;
 	VerAlignType m_textVerAlignType;
 	std::wstring m_sCurrentColor;
@@ -969,6 +1008,7 @@ protected:
 	std::wstring m_sText;
 	std::wstring m_sPromptText;
 	std::wstring m_sPromptTextId;
+  LONG m_PromptStyle;
 	nbase::WeakCallbackFlag m_drawCaretFlag;
 	std::weak_ptr<nbase::WeakFlag> m_windowFlag; //记录所属窗体的flag
 	FunGetNaturalSize m_cbGetNaturalSize;

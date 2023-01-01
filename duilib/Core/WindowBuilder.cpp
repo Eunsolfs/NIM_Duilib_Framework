@@ -21,14 +21,18 @@ Box* WindowBuilder::Create(STRINGorID xml, CreateControlCallback pCallback,
 		else if (GlobalManager::IsUseZip()) {
 			std::wstring sFile = GlobalManager::GetResourcePath();
 			sFile += xml.m_lpstr;
-			HGLOBAL hGlobal = GlobalManager::GetData(sFile);
+			HGLOBAL hGlobal = GlobalManager::GetZipData(sFile);
 			if (hGlobal)
 			{
-				std::string src((LPSTR)GlobalLock(hGlobal), GlobalSize(hGlobal));
-				std::wstring string_resourse;
-				StringHelper::MBCSToUnicode(src.c_str(), string_resourse, CP_UTF8);
+				BYTE *data = (BYTE*)GlobalLock(hGlobal);
+				DWORD len = GlobalSize(hGlobal);
+
+				bool ret = m_xml.LoadFromMem(data, len);
+
+				GlobalUnlock(hGlobal);
 				GlobalFree(hGlobal);
-				if (!m_xml.Load(string_resourse.c_str())) return NULL;
+
+				if (!ret) return NULL;
 			}
 			else
 			{
@@ -36,7 +40,7 @@ Box* WindowBuilder::Create(STRINGorID xml, CreateControlCallback pCallback,
 			}
 		}
 		else {
-			if (!m_xml.LoadFromFile(xml.m_lpstr)) return NULL;
+			if( !m_xml.LoadFromFile(xml.m_lpstr) ) return NULL;
 		}
 	}
 	else {
@@ -181,6 +185,9 @@ Box* WindowBuilder::Create(CreateControlCallback pCallback, Window* pManager, Bo
 						rc.bottom = _tcstol(pstr + 1, &pstr, 10); ASSERT(pstr);
 						pManager->SetAlphaFixCorner(rc);
 					}
+					else if (strName == _T("renderalpha")) {
+						pManager->SetRenderTransparent(strValue == _T("true"));
+					}
 				}
 			}
 		}
@@ -191,13 +198,33 @@ Box* WindowBuilder::Create(CreateControlCallback pCallback, Window* pManager, Bo
 				if( strClass == _T("Image") ) {
 					ASSERT(FALSE);	//废弃
 				}
+				else if (strClass == _T("FontResource")) {
+					nAttributes = node.GetAttributeCount();
+					std::wstring strFontFile;
+					std::wstring strFontName;
+					for (int i = 0; i < nAttributes; i++) {
+						strName = node.GetAttributeName(i);
+						strValue = node.GetAttributeValue(i);
+						if (strName == _T("file")) {
+							strFontFile = strValue;
+						}
+						else if (strName == _T("name")) {
+							strFontName = strValue;
+						}
+					}
+					if (!strFontFile.empty()) {
+						FontManager::GetInstance()->AddFontResource(strFontFile, strFontName);
+					}
+				}
 				else if( strClass == _T("Font") ) {
 					nAttributes = node.GetAttributeCount();
 					std::wstring strFontId;
 					std::wstring strFontName;
 					int size = 12;
+					int weight = 0;
 					bool bold = false;
 					bool underline = false;
+					bool strikeout = false;
 					bool italic = false;
 					bool isDefault = false;
 					for( int i = 0; i < nAttributes; i++ ) {
@@ -219,15 +246,21 @@ Box* WindowBuilder::Create(CreateControlCallback pCallback, Window* pManager, Bo
 						else if( strName == _T("underline") ) {
 							underline = (strValue == _T("true"));
 						}
+						else if (strName == _T("strikeout")) {
+							strikeout = (strValue == _T("true"));
+						}
 						else if( strName == _T("italic") ) {
 							italic = (strValue == _T("true"));
 						}
 						else if( strName == _T("default") ) {
 							isDefault = (strValue == _T("true"));
 						}
+						else if ( strName == _T("weight") ) {
+							weight = _tcstol(strValue.c_str(), &pstr, 10);
+						}
 					}
 					if( !strFontName.empty() ) {
-						GlobalManager::AddFont(strFontId, strFontName, size, bold, underline, italic, isDefault);
+						GlobalManager::AddFont(strFontId, strFontName, size, bold, underline, strikeout, italic, isDefault, weight);
 					}
 				}
 				else if( strClass == _T("Class") ) {
@@ -307,13 +340,31 @@ Box* WindowBuilder::Create(CreateControlCallback pCallback, Window* pManager, Bo
 						pManager->AddClass(strClassName, strAttribute);
 					}
 				}
+				else if (strClass == _T("TextColor")) {
+					nAttributes = node.GetAttributeCount();
+					std::wstring strColorName;
+					std::wstring strColor;
+					for (int i = 0; i < nAttributes; i++) {
+						strName = node.GetAttributeName(i);
+						strValue = node.GetAttributeValue(i);
+						if (strName == _T("name")) {
+							strColorName = strValue;
+						}
+						else if (strName == _T("value")) {
+							strColor = strValue;
+						}
+					}
+					if (!strColorName.empty()) {
+						pManager->AddTextColor(strColorName, strColor);
+					}
+				}
 			}
 		}
 	}
 
 	for( CMarkupNode node = root.GetChild() ; node.IsValid(); node = node.GetSibling() ) {
 		std::wstring strClass = node.GetName();
-		if( strClass == _T("Image") || strClass == _T("Font")
+		if (strClass == _T("Image") || strClass == _T("FontResource") || strClass == _T("Font")
 			|| strClass == _T("Class") || strClass == _T("TextColor") ) {
 
 		}
@@ -322,13 +373,13 @@ Box* WindowBuilder::Create(CreateControlCallback pCallback, Window* pManager, Bo
 				return (Box*)_Parse(&root, pParent, pManager);
 			}
 			else {
+				_Parse(&node, pUserDefinedBox, pManager);
+
 				int nAttributes = node.GetAttributeCount();
-				for( int i = 0; i < nAttributes; i++ ) {
+				for (int i = 0; i < nAttributes; i++) {
 					ASSERT(i == 0 || _tcscmp(node.GetAttributeName(i), _T("class")) != 0);	//class必须是第一个属性
 					pUserDefinedBox->SetAttribute(node.GetAttributeName(i), node.GetAttributeValue(i));
 				}
-				
-				_Parse(&node, pUserDefinedBox, pManager);
 				return pUserDefinedBox;
 			}
 		}
@@ -404,7 +455,27 @@ Control* WindowBuilder::_Parse(CMarkupNode* pRoot, Control* pParent, Window* pMa
 			continue;
 		}
 
+		// TreeView相关必须先添加后解析
+		if (strClass == DUI_CTR_TREENODE) {
+			TreeNode* pNode = static_cast<TreeNode*>(pControl);
+			TreeView* pTreeView = dynamic_cast<TreeView*>(pParent);
+			if (pTreeView) {
+				pTreeView->GetRootNode()->AddChildNode(pNode);
+			}
+			else {
+				TreeNode* pTreeNode = dynamic_cast<TreeNode*>(pParent);
+				if (pTreeNode) {
+					pTreeNode->AddChildNode(pNode);
+				}
+			}
+		}
+
 		pControl->SetWindow(pManager);
+		// Add children
+		if (node.HasChildren()) {
+			_Parse(&node, (Box*)pControl, pManager);
+		}
+
 		// Process attributes
 		if( node.HasAttributes() ) {
 			// Set ordinary attributes
@@ -415,14 +486,9 @@ Control* WindowBuilder::_Parse(CMarkupNode* pRoot, Control* pParent, Window* pMa
 			}
 		}
 
-        // Add children
-        if( node.HasChildren() ) {
-            _Parse(&node, (Box*)pControl, pManager);
-        }
-
 		// Attach to parent
         // 因为某些属性和父窗口相关，比如selected，必须先Add到父窗口
-		if( pParent != NULL ) {
+		if (pParent != NULL && strClass != DUI_CTR_TREENODE) {
 			Box* pContainer = dynamic_cast<Box*>(pParent);
 			ASSERT(pContainer);
 			if( pContainer == NULL ) return NULL;
@@ -492,8 +558,9 @@ Control* WindowBuilder::CreateControlByClass(const std::wstring& strControlClass
 		else if( strControlClass == DUI_CTR_CHECKBOXBOX )		pControl = new CheckBoxBox;
 		break;
 	case 14:
-		if (strControlClass == DUI_CTR_VIRTUALLISTBOX)			pControl = new VirtualListBox;
-		else if (strControlClass == DUI_CTR_CIRCLEPROGRESS)     pControl = new CircleProgress;
+    if (strControlClass == DUI_CTR_VIRTUALLISTBOX)			pControl = new VirtualListBox;
+    else if (strControlClass == DUI_CTR_CIRCLEPROGRESS)     pControl = new CircleProgress;
+    else if (strControlClass == DUI_CTR_VIRTUALTILEBOX)     pControl = new VirtualTileBox;
 		break;
 	case 15:
 		break;

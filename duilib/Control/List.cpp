@@ -14,6 +14,24 @@ ListBox::ListBox(Layout* pLayout) :
 
 }
 
+std::wstring ListBox::GetType() const
+{
+	return DUI_CTR_LISTBOX;
+}
+
+UIAControlProvider* ListBox::GetUIAProvider()
+{
+#if defined(ENABLE_UIAUTOMATION)
+	if (m_pUIAProvider == nullptr)
+	{
+		m_pUIAProvider = static_cast<UIAControlProvider*>(new (std::nothrow) UIAListBoxProvider(this));
+	}
+	return m_pUIAProvider;
+#else
+	return nullptr;
+#endif
+}
+
 void ListBox::SetAttribute(const std::wstring& strName, const std::wstring& strValue)
 {
 	if( strName == _T("scrollselect") ) {
@@ -175,6 +193,19 @@ bool ListBox::ButtonDown(EventArgs& msg)
 	return ret;
 }
 
+void ListBox::SetPos(UiRect rc) {
+  ui::UiRect old_pos = GetPos();
+
+  ScrollableBox::SetPos(rc);
+
+  if (old_pos.IsRectEmpty() && m_iCurSel != -1) {
+    if (GetItemAt(m_iCurSel)) {
+      UiRect rcItem = GetItemAt(m_iCurSel)->GetPos();
+      EnsureVisible(rcItem);
+    }
+  }
+}
+
 bool ListBox::ScrollItemToTop(const std::wstring& strItemName)
 {
 	for (auto it = m_items.begin(); it != m_items.end(); it++) {
@@ -270,7 +301,7 @@ bool ListBox::Add(Control* pControl)
 	return ScrollableBox::Add(pControl);
 }
 
-bool ListBox::AddAt(Control* pControl, int iIndex)
+bool ListBox::AddAt(Control* pControl, std::size_t iIndex)
 {
 	// Override the AddAt() method so we can add items specifically to
 	// the intended widgets. Headers and are assumed to be
@@ -292,7 +323,8 @@ bool ListBox::AddAt(Control* pControl, int iIndex)
 			pListItem->SetIndex(i);
 		}
 	}
-	if( m_iCurSel >= iIndex ) m_iCurSel += 1;
+  if (m_iCurSel >= static_cast<int>(iIndex)) m_iCurSel += 1;
+
 	return true;
 }
 
@@ -304,7 +336,7 @@ bool ListBox::Remove(Control* pControl)
 	return RemoveAt(iIndex);
 }
 
-bool ListBox::RemoveAt(int iIndex)
+bool ListBox::RemoveAt(std::size_t iIndex)
 {
 	if (!ScrollableBox::RemoveAt(iIndex)) return false;
 
@@ -393,7 +425,26 @@ ListContainerElement::ListContainerElement() :
 	m_pOwner(nullptr)
 {
 	m_uTextStyle = DT_LEFT | DT_VCENTER | DT_END_ELLIPSIS | DT_NOCLIP | DT_SINGLELINE;
+	// 列表项不处理WM_POINTER消息，可以顺利收到右键菜单消息
 	SetReceivePointerMsg(false);
+}
+
+std::wstring ListContainerElement::GetType() const
+{
+	return DUI_CTR_LISTCONTAINERELEMENT;
+}
+
+UIAControlProvider* ListContainerElement::GetUIAProvider()
+{
+#if defined(ENABLE_UIAUTOMATION)
+	if (m_pUIAProvider == nullptr)
+	{
+		m_pUIAProvider = static_cast<UIAControlProvider*>(new (std::nothrow) UIAListBoxItemProvider(this));
+	}
+	return m_pUIAProvider;
+#else
+	return nullptr;
+#endif
 }
 
 void ListContainerElement::SetVisible(bool bVisible)

@@ -127,10 +127,14 @@ enum EventType
 	kEventSelect,
 	kEventUnSelect,
 
+	kEventExpand,
+	kEventUnExpand,
+
 	kEventTextChange,
 	kEventReturn,
 	kEventTab,
 	kEventCustomLinkClick,
+  kEventTextLinesChange,
 
 	kEventImeStartComposition,
 	kEventImeEndComposition,
@@ -140,6 +144,8 @@ enum EventType
 	kEventResize,
 
 	kEventNotify,	//仅作简单的通知，有复杂数据请通过其他方式实现
+
+	kEventVisibleChange,
 
 	kEventLast,
 };
@@ -168,6 +174,9 @@ enum EventType
 #define EVENTSTR_SELECT				(_T("select"))
 #define EVENTSTR_UNSELECT			(_T("unselect"))
 #define	EVENTSTR_MENU				(_T("menu"))
+
+#define EVENTSTR_EXPAND				(_T("expand"))
+#define EVENTSTR_UNEXPAND			(_T("unexpand"))
 
 #define	EVENTSTR_SCROLLWHEEL		(_T("scrollwheel"))
 #define EVENTSTR_SCROLLCHANGE		(_T("scrollchange"))
@@ -231,6 +240,7 @@ EventType StringToEnum(const std::wstring& messageType);
 #define  DUI_CTR_VLISTBOX                        (_T("VListBox"))
 #define  DUI_CTR_VIRTUALLISTBOX                  (_T("VirtualListBox"))
 #define  DUI_CTR_TILELISTBOX                     (_T("TileListBox"))
+#define  DUI_CTR_VIRTUALTILEBOX                  (_T("VirtualTileBox"))
 
 #define  DUI_CTR_TREENODE                        (_T("TreeNode"))
 #define  DUI_CTR_TREEVIEW                        (_T("TreeView"))

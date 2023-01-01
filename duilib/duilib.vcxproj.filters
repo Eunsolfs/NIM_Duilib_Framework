@@ -45,6 +45,12 @@
     <Filter Include="Source Files\Render">
       <UniqueIdentifier>{93308611-e7ba-4331-845a-700f5b457c52}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Automation">
+      <UniqueIdentifier>{7552f3c2-e541-4000-bc12-99ca026b84c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Automation">
+      <UniqueIdentifier>{1cb1a7d9-ddb1-4be4-9bc7-d5bc29a72da6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="StdAfx.cpp">
@@ -155,9 +161,6 @@
     <ClCompile Include="Render\Bitmap.cpp">
       <Filter>Source Files\Render</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Image.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
     <ClCompile Include="Utils\OnScreenKeyboardManager.cpp">
       <Filter>Source Files\Utils</Filter>
     </ClCompile>
@@ -176,11 +179,74 @@
     <ClCompile Include="Render\Matrix.cpp">
       <Filter>Source Files\Render</Filter>
     </ClCompile>
-    <ClCompile Include="Utils\UnZip.cpp">
+    <ClCompile Include="Utils\FontManager.cpp">
       <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\Menu.cpp">
+      <Filter>Source Files\Control</Filter>
     </ClCompile>
     <ClCompile Include="Control\CircleProgress.cpp">
       <Filter>Source Files\Control</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\UnZip.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\SvgUtil.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Image.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\UIAControlProvider.cpp">
+      <Filter>Source Files\Automation</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\UIAWindowProvider.cpp">
+      <Filter>Source Files\Automation</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\UIABoxProvider.cpp">
+      <Filter>Source Files\Automation</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\UIALabelProvider.cpp">
+      <Filter>Source Files\Automation</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\UIACheckBoxProvider.cpp">
+      <Filter>Source Files\Automation</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\UIAProgressProvider.cpp">
+      <Filter>Source Files\Automation</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\UIAButtonProvider.cpp">
+      <Filter>Source Files\Automation</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\UIARichEditProvider.cpp">
+      <Filter>Source Files\Automation</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\UIAComboBoxProvider.cpp">
+      <Filter>Source Files\Automation</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\UIATreeNodeProvider.cpp">
+      <Filter>Source Files\Automation</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\UIAScrollBarProvider.cpp">
+      <Filter>Source Files\Automation</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\UIAScrollableBoxProvider.cpp">
+      <Filter>Source Files\Automation</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\UIAListBoxProvider.cpp">
+      <Filter>Source Files\Automation</Filter>
+    </ClCompile>
+    <ClCompile Include="Automation\UIAListBoxItemProvider.cpp">
+      <Filter>Source Files\Automation</Filter>
+    </ClCompile>
+    <ClCompile Include="Control\VirtualTileBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\BoxShadow.cpp">
+      <Filter>Source Files\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\GdiHepler.cpp">
+      <Filter>Source Files\Utils</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -316,9 +382,6 @@
     <ClInclude Include="Render\Bitmap.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Image.h">
-      <Filter>Header Files\Render</Filter>
-    </ClInclude>
     <ClInclude Include="Utils\OnScreenKeyboardManager.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
@@ -337,11 +400,74 @@
     <ClInclude Include="Render\Matrix.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Utils\UnZip.h">
+    <ClInclude Include="Utils\FontManager.h">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
     <ClInclude Include="Control\CircleProgress.h">
       <Filter>Header Files\Control</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\Menu.h">
+      <Filter>Header Files\Control</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\UnZip.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\SvgUtil.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Image.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Automation\UIAControlProvider.h">
+      <Filter>Header Files\Automation</Filter>
+    </ClInclude>
+    <ClInclude Include="Automation\UIAWindowProvider.h">
+      <Filter>Header Files\Automation</Filter>
+    </ClInclude>
+    <ClInclude Include="Automation\UIABoxProvider.h">
+      <Filter>Header Files\Automation</Filter>
+    </ClInclude>
+    <ClInclude Include="Automation\UIALabelProvider.h">
+      <Filter>Header Files\Automation</Filter>
+    </ClInclude>
+    <ClInclude Include="Automation\UIACheckBoxProvider.h">
+      <Filter>Header Files\Automation</Filter>
+    </ClInclude>
+    <ClInclude Include="Automation\UIAProgressProvider.h">
+      <Filter>Header Files\Automation</Filter>
+    </ClInclude>
+    <ClInclude Include="Automation\UIAButtonProvider.h">
+      <Filter>Header Files\Automation</Filter>
+    </ClInclude>
+    <ClInclude Include="Automation\UIARichEditProvider.h">
+      <Filter>Header Files\Automation</Filter>
+    </ClInclude>
+    <ClInclude Include="Automation\UIAComboBoxProvider.h">
+      <Filter>Header Files\Automation</Filter>
+    </ClInclude>
+    <ClInclude Include="Automation\UIATreeNodeProvider.h">
+      <Filter>Header Files\Automation</Filter>
+    </ClInclude>
+    <ClInclude Include="Automation\UIAScrollBarProvider.h">
+      <Filter>Header Files\Automation</Filter>
+    </ClInclude>
+    <ClInclude Include="Automation\UIAScrollableBoxProvider.h">
+      <Filter>Header Files\Automation</Filter>
+    </ClInclude>
+    <ClInclude Include="Automation\UIAListBoxProvider.h">
+      <Filter>Header Files\Automation</Filter>
+    </ClInclude>
+    <ClInclude Include="Automation\UIAListBoxItemProvider.h">
+      <Filter>Header Files\Automation</Filter>
+    </ClInclude>
+    <ClInclude Include="Control\VirtualTileBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\BoxShadow.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\GdiHepler.h">
+      <Filter>Header Files\Utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

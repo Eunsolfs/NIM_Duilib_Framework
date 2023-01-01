@@ -29,6 +29,7 @@ private:
 
 class UILIB_API IBitmap : public nbase::SupportWeakCallback
 {
+public:
 	virtual bool Init(HDC hSrcDC, int width, int height, bool flipBItmap) = 0;
 	virtual void Clear() = 0;
 	virtual HBITMAP DetachBitmap() = 0;
@@ -40,6 +41,7 @@ class UILIB_API IBitmap : public nbase::SupportWeakCallback
 
 	virtual void ClearAlpha(const UiRect& rcDirty, int alpha) = 0;
 	virtual void RestoreAlpha(const UiRect& rcDirty, const UiRect& rcShadowPadding, int alpha) = 0;
+	virtual void RestoreAlpha(const UiRect& rcDirty, const UiRect& rcShadowPadding) = 0;
 };
 
 class UILIB_API IPen : public nbase::SupportWeakCallback
@@ -173,10 +175,12 @@ public:
 
 	virtual HBITMAP DetachBitmap() = 0;
 	virtual BYTE* GetBits() = 0;
+	virtual HBITMAP GetBitmap() = 0;
 	virtual int	GetWidth() = 0;
 	virtual int GetHeight() = 0;
 	virtual void ClearAlpha(const UiRect& rcDirty, int alpha = 0) = 0;
-	virtual void RestoreAlpha(const UiRect& rcDirty, const UiRect& rcShadowPadding = UiRect(), int alpha = 0) = 0;
+	virtual void RestoreAlpha(const UiRect& rcDirty, const UiRect& rcShadowPadding, int alpha) = 0;
+	virtual void RestoreAlpha(const UiRect& rcDirty, const UiRect& rcShadowPadding = UiRect()) = 0;
 
 	virtual bool IsRenderTransparent() const = 0;
 	virtual bool SetRenderTransparent(bool bTransparent) = 0;
@@ -192,10 +196,13 @@ public:
 	virtual void ClearClip() = 0;
 
 	virtual HRESULT BitBlt(int x, int y, int cx, int cy, HDC hdcSrc, int xSrc = 0, int yScr = 0, DWORD rop = SRCCOPY) = 0;
+	virtual bool StretchBlt(int xDest, int yDest, int widthDest, int heightDest, HDC hdcSrc, int xSrc, int yScr, int widthSrc, int heightSrc, DWORD rop = SRCCOPY) = 0;
 	virtual bool AlphaBlend(int xDest, int yDest, int widthDest, int heightDest, HDC hdcSrc, int xSrc, int yScr, int widthSrc, int heightSrc, BYTE uFade = 255) = 0;
 
-	virtual void DrawImage(const UiRect& rcPaint, HBITMAP hBitmap, bool bAlphaChannel,
-		const UiRect& rcImageDest, const UiRect& rcImageSource, const UiRect& rcCorners, BYTE uFade = 255, bool xtiled = false, bool ytiled = false) = 0;
+	virtual void DrawImage(const UiRect& rcPaint, const CSize& scrollPos, HBITMAP hBitmap, bool bAlphaChannel,
+		const UiRect& rcImageDest, const UiRect& rcImageSource, UiRect rcCorners,
+		bool bBitmapDpiScale = false, BYTE uFade = 255,
+		bool xtiled = false, bool ytiled = false, bool fullxtiled = true, bool fullytiled = true, int nTiledMargin = 0) = 0;
 
 	virtual void DrawColor(const UiRect& rc, DWORD dwColor, BYTE uFade = 255) = 0;
 	virtual void DrawColor(const UiRect& rc, const std::wstring& colorStr, BYTE uFade = 255) = 0;
@@ -206,15 +213,20 @@ public:
 	virtual void DrawRect(const UiRect& rc, int nSize, DWORD dwPenColor) = 0;
 	virtual void DrawRoundRect(const UiRect& rc, const CSize& roundSize, int nSize, DWORD dwPenColor) = 0;
 
-	virtual void DrawText(const UiRect& rc, const std::wstring& strText, DWORD dwTextColor, const std::wstring& strFontId, UINT uStyle, BYTE uFade = 255, bool bLineLimit = false) = 0;
+	virtual void DrawText(const UiRect& rc, const std::wstring& strText, DWORD dwTextColor, const std::wstring& strFontId, UINT uStyle, BYTE uFade = 255, bool bLineLimit = false, bool bFillPath = false) = 0;
 
 	virtual void DrawEllipse(const UiRect& rc, int nSize, DWORD dwColor) = 0;
 	virtual void FillEllipse(const UiRect& rc, DWORD dwColor) = 0;
+
+  virtual void DrawCircle(const UiRect& rc, int nSize, DWORD dwColor) = 0;
+  virtual void FillCircle(const UiRect& rc, DWORD dwColor) = 0;
 
 	virtual UiRect MeasureText(const std::wstring& strText, const std::wstring& strFontId, UINT uStyle, int width = DUI_NOSET_VALUE) = 0;
 
 	virtual void DrawPath(const IPath* path, const IPen* pen) = 0;
 	virtual void FillPath(const IPath* path, const IBrush* brush) = 0;
+
+	virtual void DrawBoxShadow(const UiRect& rc, const CSize& roundSize, const CPoint& cpOffset, int nBlurRadius, int nBlurSize, int nSpreadSize, DWORD dwColor, bool bExclude) = 0;
 };
 
 class UILIB_API IRenderFactory

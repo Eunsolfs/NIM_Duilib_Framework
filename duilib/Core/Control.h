@@ -17,6 +17,8 @@ public:
 	}
 };
 
+class UIAControlProvider;
+
 class UILIB_API Control : public PlaceHolder
 {
 	typedef std::map<int, CEventSource> GifEventMap;
@@ -25,6 +27,8 @@ public:
 	Control(const Control& r);
 	Control& operator=(const Control& r) = delete;
     virtual ~Control();
+
+	virtual std::wstring GetType() const;
 
     /// 图形相关
 	/**
@@ -72,7 +76,7 @@ public:
 	 * @param[in] strImage 要设置的图片路径
 	 * @return 无
 	 */
-    void SetBkImage(const std::wstring& strImage);
+	void SetBkImage(const std::wstring& strImage);
 
 	/**
 	 * @brief 设置背景图片（UTF8 格式字符串）
@@ -80,6 +84,26 @@ public:
 	 * @return 无
 	 */
 	void SetUTF8BkImage(const std::string& strImage);
+
+  /**
+  * @brief 获取loading状态图片位置
+  * @return loading图片位置
+  */
+  std::wstring GetLoadingImage() const;
+
+  /**
+  * @brief 设置loading图片
+  * @param[in] strImage 要设置的图片路径
+  * @return 无
+  */
+  void SetLoadingImage(const std::wstring& strImage);
+
+  /**
+  * @brief 设置loading背景色
+  * @param[in] strColor 背景色
+  * @return 无
+  */
+  void SetLoadingBkColor(const std::wstring& strColor);
 
 	/**
 	 * @brief 获取指定状态下的图片位置
@@ -227,7 +251,14 @@ public:
 	 * @param[in] cxyRound 一个 CSize 结构表示了四个方向边框的大小
 	 * @return 无
 	 */
-	void SetBorderRound(CSize cxyRound);
+	void SetBorderRound(CSize cxyRound, bool bNeedDpiScale = true);
+
+	/**
+	 * @brief 设置边框阴影
+	 * @param[in] 要设置的阴影属性
+	 * @return 无
+	 */
+	void SetBoxShadow(const std::wstring& strShadow);
 
     /// 鼠标相关
 	/**
@@ -309,6 +340,32 @@ public:
 	 * @return 无
 	 */
     virtual void SetContextMenuUsed(bool bMenuUsed);
+
+	/**
+	  * @brief 获取控件右键菜单的弹出位置信息
+	  * @return 位置信息
+	  */
+	virtual std::wstring GetMenuPopup() const;
+
+	/**
+	  * @brief 设置控件右键菜单的弹出位置信息
+	 * @param[in] strPopup 位置信息，参见Menu.h StringToMenuPopup()
+	  * @return 无
+	  */
+	virtual void SetMenuPopup(const std::wstring& strPopup);
+
+	/**
+	* @brief 获取控件右键菜单的对齐信息
+	* @return 对齐信息
+	*/
+	virtual std::wstring GetMenuAlign() const;
+
+	/**
+	  * @brief 设置控件右键菜单的对齐信息
+	  * @param[in] strAlign 对齐信息，参见Menu.h StringToMenuAlign()
+	  * @return 无
+	  */
+	virtual void SetMenuAlign(const std::wstring& strAlign);
 
     /// 用户数据，辅助函数，供用户使用
 	/**
@@ -455,11 +512,25 @@ public:
 	virtual bool IsActivatable() const;
 
 	/**
-	 * @brief 待补充
+	 * @brief 激活控件，如点击、选中、展开等操作
 	 * @param[in] 待补充
 	 * @return 待补充
 	 */
 	virtual void Activate();
+
+	/**
+	 * @brief 取消激活控件，如反选、隐藏等操作
+	 * @param[in] 待补充
+	 * @return 待补充
+	 */
+	virtual void Deactivate();
+
+	/**
+	 * @brief 是否激活，如选中、展开等
+	 * @param[in] 待补充
+	 * @return 待补充
+	 */
+	virtual bool IsActivated();
 
 	/// 控件搜索
 	/**
@@ -522,6 +593,12 @@ public:
 	 */
 	virtual bool IsPointInWithScrollOffset(const CPoint& point) const;
 
+	/**
+	 * @brief Get ui automation provider 
+	 * @return nullptr or pointer
+	 */
+	virtual UIAControlProvider* GetUIAProvider();
+
 	// 消息处理
 	/**
 	 * @brief 控件统一的消息处理入口，将传统 Windows 消息转换为自定义格式的消息
@@ -552,7 +629,7 @@ public:
 	 * @param[in] bRecv 设置为 true 表示响应触控消息，false 为不响应
 	 * @return 无
 	 */
-	void SetReceivePointerMsg(bool bRecv) { m_bReceivePointerMsg = bRecv; };
+	virtual void SetReceivePointerMsg(bool bRecv) { m_bReceivePointerMsg = bRecv; };
 	
 	/**
 	 * @brief 判断控件是否响应触控消息
@@ -696,6 +773,19 @@ public:
 	void SetHotAlpha(int nHotAlpha);
 
 	/**
+	 * @brief 设置是否接受TAB键切换焦点
+	 * @param[in] enable
+	 * @return 无
+	 */
+	void SetTabStop(bool enable);
+
+	/**
+	 * @brief 检查是否接受TAB键切换焦点
+	 * @return 返回控件是否接受TAB键切换焦点
+	 */
+	bool IsAllowTabStop() const { return m_bAllowTabstop; }
+
+	/**
 	 * @brief 获取焦点状态透明度
 	 * @return 返回控件焦点状态的透明度
 	 */
@@ -750,6 +840,38 @@ public:
 	 * @return 无
 	 */
 	void AttachGifPlayStop(const EventCallback& callback){ OnGifEvent[m_nVirtualEventGifStop] += callback; };
+
+  /**
+  * @brief 开启loading状态
+  * @param[in] start_angle loading图片旋转的角度
+  * @return 无
+  */
+  virtual void StartLoading(int fStartAngle = -1);
+
+  /**
+  * @brief 关闭loading状态
+  * @param[in] frame 播放完成停止在哪一帧，可设置第一帧、当前帧和最后一帧。请参考 GifStopType 枚举
+  * @return 无
+  */
+  virtual void StopLoading(GifStopType frame = kGifStopFirst);
+
+  /**
+  * @brief 计算loading图片的旋转角度
+  * @return 无
+  */
+  virtual void Loading();
+  /**
+  * @brief 是否正在loading
+  * @return 在loading返回true, 反之返回false
+  */
+  virtual bool IsLoading();
+
+  /**
+  * @brief 设置椭圆背景
+  * @param[in] bEllipseBkground 是否设置椭圆背景
+  * @return 无
+  */
+  virtual void SetEllipseBkground(bool bEllipseBkground);
 
 	/// 动画管理
 	/**
@@ -848,6 +970,48 @@ public:
 	void AttachResize(const EventCallback& callback) { OnEvent[kEventResize] += callback; }
 
 	/**
+	 * @brief 监听双击事件
+	 * @param[in] callback 事件处理的回调函数，请参考 EventCallback 声明
+	 * @return 无
+	 */
+	void AttachDoubleClick(const EventCallback& callback) { OnEvent[kEventMouseDoubleClick] += callback; }
+
+	/**
+	* @brief 监听控件关闭前最后一条消息
+	* @param[in] callback 事件处理的回调函数，请参考 EventCallback 声明
+	* @return 无
+	*/
+	void AttachLastEvent(const EventCallback& callback) { OnEvent[kEventLast] += callback; }
+
+  /**
+  * @brief 监听控件显示或隐藏事件
+  * @param[in] callback 事件处理的回调函数，请参考 EventCallback 声明
+  * @return 无
+  */
+  void AttachVisibleChange(const EventCallback& callback) { OnEvent[kEventVisibleChange] += callback; }
+
+	/**
+	* @brief 监听键盘按键按下事件
+	* @param[in] callback 事件处理的回调函数，请参考 EventCallback 声明
+	* @return 无
+	*/
+	void AttachKeyDown(const EventCallback& callback) { OnEvent[kEventKeyDown] += callback; }
+
+  /**
+  * @brief 监听键盘按键输入事件
+  * @param[in] callback 事件处理的回调函数，请参考 EventCallback 声明
+  * @return 无
+  */
+  void AttachKeyChar(const EventCallback& callback) { OnEvent[kEventChar] += callback; }
+
+  /**
+  * @brief 监听键盘按键抬起事件
+  * @param[in] callback 事件处理的回调函数，请参考 EventCallback 声明
+  * @return 无
+  */
+  void AttachKeyUp(const EventCallback& callback) { OnEvent[kEventKeyUp] += callback; }
+
+	/**
 	 * @brief 取消监听指定事件，见 EventType 枚举
 	 * @param[in] callback 事件处理的回调函数，请参考 EventCallback 声明
 	 * @return 无
@@ -855,6 +1019,7 @@ public:
 	void DetachEvent(EventType type);
 
 protected:
+	friend StateColorMap;
 	friend WindowBuilder;
 	void AttachXmlEvent(EventType eventType, const EventCallback& callback) { OnXmlEvent[eventType] += callback; }
 	/// Gif图片
@@ -870,13 +1035,22 @@ protected:
 	virtual bool ButtonUp(EventArgs& msg);
 
 	/// 绘制相关保护成员函数，不允许外部直接调用
+	virtual void PaintShadow(IRenderContext* pRender);
 	virtual void PaintBkColor(IRenderContext* pRender);
 	virtual void PaintBkImage(IRenderContext* pRender);
 	virtual void PaintStatusColor(IRenderContext* pRender);
 	virtual void PaintStatusImage(IRenderContext* pRender);
 	virtual void PaintText(IRenderContext* pRender);
 	virtual void PaintBorder(IRenderContext* pRender);
+  virtual void PaintLoading(IRenderContext* pRender);
+  virtual void PaintRoundBkColor(IRenderContext* pRender);
 
+	/**
+	* @brief 获取某个颜色对应的值，优先获取窗口颜色
+	* @param[in] strName 颜色名字
+	* @return DWORD ARGB颜色值
+	*/
+	DWORD GetWindowColor(const std::wstring& strName);
 private:
 	void BroadcastGifEvent(int nVirtualEvent);
 	int GetGifFrameIndex(GifStopType frame);
@@ -898,10 +1072,14 @@ protected:
 	bool m_bGifPlay;
 	bool m_bReceivePointerMsg;
 	bool m_bNeedButtonUpWhenKillFocus;
+	bool m_bAllowTabstop;
+  bool m_bIsLoading;
+  bool m_bEllipseBkground;
 	int m_nBorderSize;
 	int m_nTooltipWidth;
 	int m_nAlpha;
 	int m_nHotAlpha;
+  int m_fCurrrentAngele;
 	CSize m_szEstimateSize;
 	CPoint m_renderOffset;
 	CSize m_cxyBorderRound;
@@ -913,15 +1091,23 @@ protected:
 	std::wstring m_sToolTipText;
 	std::wstring m_sToolTipTextId;
 	std::wstring m_sUserData;
+	std::wstring m_sMenuPopup;
+	std::wstring m_sMenuAlign;
 	std::wstring m_strBkColor;
+  std::wstring m_strLoadingBkColor;
 	StateColorMap m_colorMap;
 	Image m_bkImage;
+  Image m_loadingImage;
 	StateImageMap m_imageMap;
 	std::wstring m_strBorderColor;
 	nbase::WeakCallbackFlag m_gifWeakFlag;
 	AnimationManager m_animationManager;
 	nbase::WeakCallbackFlag m_loadBkImageWeakFlag;
+  nbase::WeakCallbackFlag m_loadingImageFlag;
 	static const int m_nVirtualEventGifStop;
+
+	UIAControlProvider* m_pUIAProvider;
+	BoxShadow m_boxShadow;
 };
 
 } // namespace ui

@@ -106,10 +106,13 @@ public:
 
 public:
 	/// 重写父类接口，提供个性化功能。方法具体说明请查看 Control 控件             */
+	virtual std::wstring GetType() const override;
+	virtual UIAControlProvider* GetUIAProvider() override;
 	virtual void SetWindow(Window* pManager, Box* pParent, bool bInit = true) override;
 	virtual void SetAttribute(const std::wstring& strName, const std::wstring& strValue) override;
 	virtual void SetPos(UiRect rc) override;
 	virtual void HandleMessageTemplate(EventArgs& msg) override;
+	virtual void SetReceivePointerMsg(bool bRecv) override;
 	virtual void PaintChild(IRenderContext* pRender, const UiRect& rcPaint) override;
 	virtual void SetVisible_(bool bVisible) override;
 	virtual void SetInternVisible(bool bVisible = true) override;
@@ -120,7 +123,6 @@ public:
 	virtual void UnLoadImageCache() override;
 	virtual void ClearImageCache() override;
 	virtual UINT GetControlFlags() const override;
-
 
 	/// 容器自有方法
 	/**
@@ -202,6 +204,13 @@ public:
 	virtual void RemoveAll();
 
 	/**
+	 * @brief 检查是否包含某一个控件
+	 * @param[in] pControl 控件的指针
+	 * @return 返回 true 包含，false 不包含
+	 */
+	bool HasItem(Control* pControl) const;
+
+	/**
 	 * @brief 交换子控件位置
 	 * @param[in] pChild1 子控件1 指针
 	 * @param[in] pChild2 子控件2 指针
@@ -228,7 +237,7 @@ public:
 	 * @param[in] bAuto true 为自动销毁，false 为不自动销毁
 	 * @return 无
 	 */
-    virtual void SetAutoDestroy(bool bAuto);
+    virtual void SetAutoDestroyChild(bool bAuto);
 
 	/**
 	 * @brief 判断窗口关闭后是否自动销毁
@@ -267,7 +276,7 @@ public:
 	 * @param[in] pLayout 布局对象指针
 	 * @return 无
 	 */
-	virtual void RetSetLayout(Layout* pLayout);
+	virtual void ReSetLayout(Layout* pLayout);
 
 	/**
 	 * @brief 获取内边距的位置信息
@@ -278,17 +287,25 @@ public:
 	/**
 	 * @brief 绑定事件处理函数
 	 * @param[in] eventType 事件类型
-	 * @return callback 指定回调函数
+	 * @param[in] callback 指定回调函数
+	 * @return void 无
 	 */
-	void AttachBubbledEvent(EventType eventType, const EventCallback& callback)	{ OnBubbledEvent[eventType] += callback; }
-
+ 	void AttachBubbledEvent(EventType eventType, const EventCallback& callback)	{ OnBubbledEvent[eventType] += callback; }
+ 
+	/**
+	 * @brief 解绑事件处理函数
+	 * @param[in] eventType 事件类型
+	 * @return void 无
+	 */
+	void DetachBubbledEvent(EventType eventType);
 private:
 	friend WindowBuilder;
 
 	/**
 	 * @brief 绑定 XML 中编写的 Event 和 BubbleEvent 事件的处理函数
 	 * @param[in] eventType 事件类型
-	 * @return callback 指定回调函数
+	 * @param[in] callback 指定回调函数
+	 * @return void 无
 	 */
 	void AttachXmlBubbledEvent(EventType eventType, const EventCallback& callback) { OnXmlBubbledEvent[eventType] += callback; }
 
@@ -311,6 +328,8 @@ public:
 	ScrollableBox(const ScrollableBox& r);
 	ScrollableBox& operator=(const ScrollableBox& r) = delete;
 
+	virtual std::wstring GetType() const override;
+	virtual UIAControlProvider* GetUIAProvider() override;
 	virtual void SetAttribute(const std::wstring& pstrName, const std::wstring& pstrValue) override;
 	virtual void SetPos(UiRect rc) override;
 	virtual void HandleMessage(EventArgs& event) override;
@@ -566,6 +585,19 @@ public:
 	void SetScrollBarFloat(bool bScrollBarFloat);
 
 	/**
+	 * @brief 获取容器的滚动条是否在左侧显示
+	 * @return 返回 true 表示在左侧，false 为右侧
+	 */
+	bool GetVScrollBarLeftPos() const;
+
+	/**
+	* @brief 设置容器的滚动条是否在左侧显示
+	* @param[in] bLeftPos true 表示在左侧，false 为右侧
+	* @return 无
+	*/
+	void SetVScrollBarLeftPos(bool bLeftPos);
+
+	/**
 	 * @brief 获取滚动条的外边距
 	 * @return 返回边距信息 
 	 */
@@ -612,7 +644,7 @@ protected:
 	 * @param[in] bFromTopLeft 暂无意义
 	 * @return 无
 	 */
-	void LoadImageCache(bool bFromTopLeft);
+	virtual void LoadImageCache(bool bFromTopLeft);
 private:
 	/**
 	 * @brief 待补充
@@ -631,6 +663,7 @@ protected:
 	bool m_bHoldEnd;
 	bool m_bScrollBarFloat;
 	bool m_bDefaultDisplayScrollbar;
+	bool m_bVScrollBarLeftPos;
 	UiRect m_rcScrollBarPadding;
 
 	CPoint m_ptLastTouchPos;

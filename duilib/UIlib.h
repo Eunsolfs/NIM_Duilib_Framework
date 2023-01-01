@@ -57,6 +57,11 @@
 #pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #endif
 
+#if defined(_MSC_VER) && (_MSC_VER >= 1920)
+#define ENABLE_UIAUTOMATION
+#pragma comment(lib, "uiautomationcore.lib")
+#endif
+
 
 #include <windows.h>
 #include <commctrl.h>
@@ -72,8 +77,14 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <unordered_set>
 #include <queue>
 #include <functional>
+
+#if defined(ENABLE_UIAUTOMATION)
+#include <UIAutomation.h>
+#include <UIAutomationCoreApi.h>
+#endif
 
 #include "Utils/Macros.h"
 #include "Utils/Utils.h"
@@ -83,9 +94,12 @@
 #include "Utils/Delegate.h"
 #include "Utils/StringUtil.h"
 #include "Utils/MultiLangSupport.h"
+#include "Utils/FontManager.h"
 #include "Utils/TimerManager.h"
 #include "Utils/OnScreenKeyboardManager.h"
 #include "Utils/Shadow.h"
+#include "Utils/BoxShadow.h"
+#include "Utils/GdiHepler.h"
 
 #include "Animation/AnimationPlayer.h"
 #include "Animation/AnimationManager.h"
@@ -100,15 +114,35 @@
 #include "Render/Path.h"
 #include "Render/Factory.h"
 
+#include "Automation/UIAControlProvider.h"
+#if defined(ENABLE_UIAUTOMATION)
+#include "Automation/UIAWindowProvider.h"
+#include "Automation/UIAScrollBarProvider.h"
+#include "Automation/UIABoxProvider.h"
+#include "Automation/UIAScrollableBoxProvider.h"
+#include "Automation/UIALabelProvider.h"
+#include "Automation/UIAButtonProvider.h"
+#include "Automation/UIACheckBoxProvider.h"
+#include "Automation/UIAProgressProvider.h"
+#include "Automation/UIARichEditProvider.h"
+#include "Automation/UIAComboBoxProvider.h"
+#include "Automation/UIAListBoxProvider.h"
+#include "Automation/UIAListBoxItemProvider.h"
+#include "Automation/UIATreeNodeProvider.h"
+#endif
+
+
 #include "Core/Define.h"
 #include "Core/Markup.h"
 #include "Core/WindowBuilder.h"
+#include "Core/Image.h"
 #include "Core/GlobalManager.h"
 #include "Core/Window.h"
 #include "Core/Placeholder.h"
 #include "Core/Control.h"
 #include "Core/Box.h"
 #include "Utils/WinImplBase.h"
+#include "Utils/SvgUtil.h"
 
 #include "Box/VBox.h"
 #include "Box/HBox.h"
@@ -132,4 +166,6 @@
 
 #include "Control/RichEdit.h"
 #include "Control/VirtualListBox.h"
+#include "Control/VirtualTileBox.h"
 
+#include "Control/Menu.h"

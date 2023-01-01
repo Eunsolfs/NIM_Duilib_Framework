@@ -17,6 +17,8 @@ public:
 	TreeNode& operator=(const TreeNode& r) = delete;
 
 	/// 重写父类方法，提供个性化功能，请参考父类声明
+	virtual std::wstring GetType() const override;
+	virtual UIAControlProvider* GetUIAProvider() override;
 	virtual bool IsVisible() const override;
 	virtual void SetInternVisible(bool bVisible) override;
 	virtual void SetWindow(Window* pManager, Box* pParent, bool bInit = true) override;
@@ -120,13 +122,27 @@ public:
 	 * @param[in] bExpand 为 true 时展开，为 false 是不展开
 	 * @return 无
 	 */
-	void SetExpand(bool bExpand);
+	void SetExpand(bool bExpand, bool bTriggerEvent = false);
 
 	/**
 	 * @brief 获取子项层级
 	 * @return 返回当前层级
 	 */
 	int GetDepth();
+
+	/**
+	 * @brief 监听子项展开事件
+	 * @param[in] callback 子项展开时触发的回调函数
+	 * @return 无
+	 */
+	void AttachExpand(const EventCallback& callback) { OnEvent[kEventExpand] += callback; }
+
+	/**
+	 * @brief 监听子项收缩事件
+	 * @param[in] callback 子项收缩时触发的回调函数
+	 * @return 无
+	 */
+	void AttachUnExpand(const EventCallback& callback) { OnEvent[kEventUnExpand] += callback; }
 
 private:
 	/**
@@ -149,6 +165,7 @@ public:
 	TreeView(void);
 
 	/// 重写父类方法，提供个性化功能，请参考父类声明
+	virtual std::wstring GetType() const override;
 	virtual void SetAttribute(const std::wstring& strName, const std::wstring& strValue) override;
 
 	/**

@@ -5,6 +5,7 @@
 namespace ui 
 {
 	const int Control::m_nVirtualEventGifStop = 1;
+
 Control::Control() :
 	OnXmlEvent(),
 	OnEvent(),
@@ -21,6 +22,9 @@ Control::Control() :
 	m_bGifPlay(true),
 	m_bReceivePointerMsg(true),
 	m_bNeedButtonUpWhenKillFocus(false),
+	m_bAllowTabstop(true),
+  m_bIsLoading(false),
+  m_bEllipseBkground(false),
 	m_szEstimateSize(),
 	m_renderOffset(),
 	m_cxyBorderRound(),
@@ -33,6 +37,7 @@ Control::Control() :
 	m_nTooltipWidth(300),
 	m_nAlpha(255),
 	m_nHotAlpha(0),
+  m_fCurrrentAngele(0),
 	m_sToolTipText(),
 	m_sToolTipTextId(),
 	m_sUserData(),
@@ -43,7 +48,13 @@ Control::Control() :
 	m_animationManager(),
 	m_imageMap(),
 	m_bkImage(),
-	m_loadBkImageWeakFlag()
+  m_loadingImage(),
+	m_loadBkImageWeakFlag(),
+  m_loadingImageFlag(),
+#if defined(ENABLE_UIAUTOMATION)
+	m_pUIAProvider(nullptr),
+#endif
+	m_boxShadow()
 {
 	m_colorMap.SetControl(this);
 	m_imageMap.SetControl(this);
@@ -67,9 +78,11 @@ Control::Control(const Control& r) :
 	m_bGifPlay(r.m_bGifPlay),
 	m_bReceivePointerMsg(r.m_bReceivePointerMsg),
 	m_bNeedButtonUpWhenKillFocus(r.m_bNeedButtonUpWhenKillFocus),
+	m_bAllowTabstop(r.m_bAllowTabstop),
 	m_szEstimateSize(r.m_szEstimateSize),
 	m_renderOffset(r.m_renderOffset),
 	m_cxyBorderRound(r.m_cxyBorderRound),
+	m_boxShadow(r.m_boxShadow),
 	m_rcMargin(r.m_rcMargin),
 	m_rcPaint(r.m_rcPaint),
 	m_rcBorderSize(r.m_rcBorderSize),
@@ -83,13 +96,17 @@ Control::Control(const Control& r) :
 	m_sToolTipTextId(r.m_sToolTipTextId),
 	m_sUserData(r.m_sUserData),
 	m_strBkColor(r.m_strBkColor),
+  m_strLoadingBkColor(r.m_strLoadingBkColor),
 	m_colorMap(r.m_colorMap),
 	m_strBorderColor(r.m_strBorderColor),
 	m_gifWeakFlag(),
 	m_animationManager(r.m_animationManager),
 	m_imageMap(r.m_imageMap),
 	m_bkImage(r.m_bkImage),
-	m_loadBkImageWeakFlag()
+  m_loadingImage(r.m_loadingImage),
+  m_bEllipseBkground(r.m_bEllipseBkground),
+	m_loadBkImageWeakFlag(),
+  m_loadingImageFlag()
 {
 	m_colorMap.SetControl(this);
 	m_imageMap.SetControl(this);
@@ -102,9 +119,26 @@ Control::Control(const Control& r) :
 
 Control::~Control()
 {
+	HandleMessageTemplate(kEventLast);
+
 	if (m_pWindow) {
 		m_pWindow->ReapObjects(this);
 	}
+
+#if defined(ENABLE_UIAUTOMATION)
+	if (nullptr != m_pUIAProvider) {
+		// Coz UiaDisconnectProviderd require at least win8
+		// UiaDisconnectProvider(m_pUIAProvider);
+		m_pUIAProvider->ResetControl();
+		m_pUIAProvider->Release();
+		m_pUIAProvider = nullptr;
+	}
+#endif
+}
+
+std::wstring Control::GetType() const
+{
+	return _T("Control");
 }
 
 std::wstring Control::GetBkColor() const
@@ -114,7 +148,7 @@ std::wstring Control::GetBkColor() const
 
 void Control::SetBkColor(const std::wstring& strColor)
 {
-	ASSERT(strColor.empty() || GlobalManager::GetTextColor(strColor) != 0);
+	ASSERT(strColor.empty() || this->GetWindowColor(strColor) != 0);
 	if( m_strBkColor == strColor ) return;
 
 	m_strBkColor = strColor;
@@ -128,7 +162,7 @@ std::wstring Control::GetStateColor(ControlStateType stateType)
 
 void Control::SetStateColor(ControlStateType stateType, const std::wstring& strColor)
 {
-	ASSERT(GlobalManager::GetTextColor(strColor) != 0);
+	ASSERT(this->GetWindowColor(strColor) != 0);
 	if( m_colorMap[stateType] == strColor ) return;
 
 	if (stateType == kControlStateHot) {
@@ -168,6 +202,24 @@ void Control::SetUTF8BkImage(const std::string& strImage)
 	std::wstring strOut;
 	StringHelper::MBCSToUnicode(strImage, strOut, CP_UTF8);
 	SetBkImage(strOut);
+}
+
+std::wstring Control::GetLoadingImage() const {
+  return m_loadingImage.imageAttribute.simageString;
+}
+
+void Control::SetLoadingImage(const std::wstring& strImage) {
+  StopGifPlay();
+  m_loadingImage.SetImageString(strImage);
+  Invalidate();
+}
+
+void Control::SetLoadingBkColor(const std::wstring& strColor) {
+  if (m_strLoadingBkColor == strColor) {
+    return;
+  }
+  m_strLoadingBkColor = strColor;
+  Invalidate();
 }
 
 std::wstring Control::GetStateImage(ControlStateType stateType)
@@ -321,11 +373,19 @@ CSize Control::GetBorderRound() const
     return m_cxyBorderRound;
 }
 
-void Control::SetBorderRound(CSize cxyRound)
+void Control::SetBorderRound(CSize cxyRound, bool bNeedDpiScale)
 {
-	DpiManager::GetInstance()->ScaleSize(cxyRound);
-    m_cxyBorderRound = cxyRound;
-    Invalidate();
+  if (bNeedDpiScale) {
+    DpiManager::GetInstance()->ScaleSize(cxyRound);
+  }
+
+  m_cxyBorderRound = cxyRound;
+  Invalidate();
+}
+
+void Control::SetBoxShadow(const std::wstring& strShadow)
+{
+	m_boxShadow.SetBoxShadowString(strShadow);
 }
 
 CursorType Control::GetCursorType() const
@@ -370,7 +430,7 @@ void Control::SetUTF8ToolTipText(const std::string& strText)
 	StringHelper::MBCSToUnicode(strText, strOut, CP_UTF8);
 	if (strOut.empty()) {
 		m_sToolTipText = _T("");
-		Invalidate();//为空则一律重刷
+		Invalidate();//~{N*?UTrR;BIVXK"~}
 		return ;
 	}
 
@@ -413,6 +473,26 @@ bool Control::IsContextMenuUsed() const
 void Control::SetContextMenuUsed(bool bMenuUsed)
 {
     m_bMenuUsed = bMenuUsed;
+}
+
+std::wstring Control::GetMenuPopup() const
+{
+	return m_sMenuPopup;
+}
+
+void Control::SetMenuPopup(const std::wstring& strPopup)
+{
+	m_sMenuPopup = strPopup;
+}
+
+std::wstring Control::GetMenuAlign() const
+{
+	return m_sMenuAlign;
+}
+
+void Control::SetMenuAlign(const std::wstring& strAlign)
+{
+	m_sMenuAlign = strAlign;
 }
 
 std::wstring Control::GetDataID() const
@@ -487,6 +567,8 @@ void Control::SetVisible_(bool bVisible)
 	if (!IsVisible()) {
 		StopGifPlay();
 	}
+
+	HandleMessageTemplate(kEventVisibleChange);
 }
 
 bool Control::IsEnabled() const
@@ -530,19 +612,20 @@ void Control::SetKeyboardEnabled(bool bEnabled)
 
 bool Control::IsFocused() const
 {
-    return m_bFocused;
+    return m_pWindow->GetFocus() == this;
 }
 
 void Control::SetFocus()
 {
 	if( m_bNoFocus )
 		return;
-    if( m_pWindow != NULL ) m_pWindow->SetFocus(this);
+
+  if( m_pWindow != NULL ) m_pWindow->SetFocus(this);
 }
 
 UINT Control::GetControlFlags() const
 {
-	return UIFLAG_TABSTOP;
+	return IsAllowTabStop() ? UIFLAG_TABSTOP : UIFLAG_DEFAULT;
 }
 
 void Control::SetNoFocus()
@@ -553,6 +636,16 @@ void Control::SetNoFocus()
 void Control::Activate()
 {
 
+}
+
+void Control::Deactivate()
+{
+
+}
+
+bool Control::IsActivated()
+{
+	return true;
 }
 
 bool Control::IsActivatable() const
@@ -663,12 +756,10 @@ CSize Control::EstimateSize(CSize szAvailable)
 			if (image->imageCache) {
 				if (GetFixedWidth() == DUI_LENGTH_AUTO) {
 					int image_width = image->imageCache->nX;
-					DpiManager::GetInstance()->ScaleInt(image_width);
 					imageSize.cx = image_width;
 				}
 				if (GetFixedHeight() == DUI_LENGTH_AUTO) {
 					int image_height = image->imageCache->nY;
-					DpiManager::GetInstance()->ScaleInt(image_height);
 					imageSize.cy = image_height;
 				}
 			}
@@ -700,6 +791,15 @@ bool Control::IsPointInWithScrollOffset(const CPoint& point) const
 	CPoint newPoint = point;
 	newPoint.Offset(scrollOffset);
 	return m_rcItem.IsPointIn(newPoint);
+}
+
+UIAControlProvider* Control::GetUIAProvider()
+{
+	if (m_pUIAProvider == nullptr)
+	{
+		m_pUIAProvider = new (std::nothrow) UIAControlProvider(this);
+	}
+	return m_pUIAProvider;
 }
 
 void Control::HandleMessageTemplate(EventType eventType, WPARAM wParam, LPARAM lParam, TCHAR tChar, CPoint mousePos, FLOAT pressure)
@@ -802,18 +902,18 @@ void Control::HandleMessage(EventArgs& msg)
 			ASSERT(FALSE);
 		}
 	}
-	else if (msg.Type == kEventInternalSetFocus) {
+	else if (msg.Type == kEventInternalSetFocus && m_uButtonState == kControlStateNormal) {
 		SetState(kControlStateHot);
-        m_bFocused = true;
-        Invalidate();
+		m_bFocused = true;
+		Invalidate();
 		return;
-    }
-	else if (msg.Type == kEventInternalKillFocus) {
+	}
+	else if (msg.Type == kEventInternalKillFocus && m_uButtonState == kControlStateHot) {
 		SetState(kControlStateNormal);
-        m_bFocused = false;
-        Invalidate();
+		m_bFocused = false;
+		Invalidate();
 		return;
-    }
+	}
 	else if (msg.Type == kEventInternalMenu && IsEnabled()) {
         if( IsContextMenuUsed() ) {
             m_pWindow->SendNotify(this, kEventMouseMenu, msg.wParam, msg.lParam);
@@ -821,22 +921,24 @@ void Control::HandleMessage(EventArgs& msg)
         }
     }
 	else if( msg.Type == kEventMouseEnter ) {
-		if (msg.pSender != this && m_pWindow) {
+		if (m_pWindow) {
 			if (!IsChild(this, m_pWindow->GetNewHover())) {
 				return;
 			}
 		}
-		MouseEnter(msg);
+		if (!MouseEnter(msg))
+			return;
 	}
 	else if( msg.Type == kEventMouseLeave ) {
-		if (msg.pSender != this && m_pWindow) {
+		if (m_pWindow) {
 			if (IsChild(this, m_pWindow->GetNewHover())) {
 				return;
 			}
 		}
-		MouseLeave(msg);
+		if (!MouseLeave(msg))
+			return;
 	}
-	else if (msg.Type == kEventMouseButtonDown || msg.Type == kEventInternalDoubleClick) {
+	else if (msg.Type == kEventMouseButtonDown) {
 		ButtonDown(msg);
 		return;
 	}
@@ -852,13 +954,17 @@ void Control::HandleMessage(EventArgs& msg)
 		ButtonUp(msg);
 		return;
 	}
+	else if (msg.Type == kEventInternalDoubleClick) {
+		if (m_pWindow != NULL) m_pWindow->SendNotify(this, kEventMouseDoubleClick);
+		return;
+	}
 
     if( m_pParent != NULL ) m_pParent->HandleMessageTemplate(msg);
 }
 
 bool Control::HasHotState()
 {
-	// 判断本控件是否有hot状态
+	// ~{EP6O1>?X<~JG7qSP~}hot~{W4L,~}
 	return m_colorMap.HasHotColor() || m_imageMap.HasHotImage();
 }
 
@@ -873,9 +979,12 @@ bool Control::MouseEnter(EventArgs& msg)
 			}
 			return true;
 		}
+		else {
+			return false;
+		}
 	}
 
-	return false;
+	return true;
 }
 
 bool Control::MouseLeave(EventArgs& msg)
@@ -889,9 +998,12 @@ bool Control::MouseLeave(EventArgs& msg)
 			}
 			return true;
 		}
+		else {
+			return false;
+		}
 	}
 
-	return false;
+	return true;
 }
 
 bool Control::ButtonDown(EventArgs& msg)
@@ -940,10 +1052,10 @@ bool Control::ButtonUp(EventArgs& msg)
 
 void Control::SetAttribute(const std::wstring& strName, const std::wstring& strValue)
 {
-	if ( strName == _T("class") ) {
+	if (strName == _T("class")) {
 		SetClass(strValue);
 	}
-	else if( strName == _T("halign") ) {
+	else if (strName == _T("halign")) {
 		if (strValue == _T("left")) {
 			SetHorAlignType(kHorAlignLeft);
 		}
@@ -957,7 +1069,7 @@ void Control::SetAttribute(const std::wstring& strName, const std::wstring& strV
 			ASSERT(FALSE);
 		}
 	}
-	else if( strName == _T("valign") ) {
+	else if (strName == _T("valign")) {
 		if (strValue == _T("top")) {
 			SetVerAlignType(kVerAlignTop);
 		}
@@ -971,20 +1083,20 @@ void Control::SetAttribute(const std::wstring& strName, const std::wstring& strV
 			ASSERT(FALSE);
 		}
 	}
-	else if( strName == _T("margin") ) {
-        UiRect rcMargin;
-        LPTSTR pstr = NULL;
-        rcMargin.left = _tcstol(strValue.c_str(), &pstr, 10);  ASSERT(pstr);    
-        rcMargin.top = _tcstol(pstr + 1, &pstr, 10);    ASSERT(pstr);    
-        rcMargin.right = _tcstol(pstr + 1, &pstr, 10);  ASSERT(pstr);    
-        rcMargin.bottom = _tcstol(pstr + 1, &pstr, 10); ASSERT(pstr);    
-        SetMargin(rcMargin);
-    }
-    else if( strName == _T("bkcolor") || strName == _T("bkcolor1") ) {
+	else if (strName == _T("margin")) {
+		UiRect rcMargin;
+		LPTSTR pstr = NULL;
+		rcMargin.left = _tcstol(strValue.c_str(), &pstr, 10);  ASSERT(pstr);
+		rcMargin.top = _tcstol(pstr + 1, &pstr, 10);    ASSERT(pstr);
+		rcMargin.right = _tcstol(pstr + 1, &pstr, 10);  ASSERT(pstr);
+		rcMargin.bottom = _tcstol(pstr + 1, &pstr, 10); ASSERT(pstr);
+		SetMargin(rcMargin);
+	}
+	else if (strName == _T("bkcolor") || strName == _T("bkcolor1")) {
 		LPCTSTR pValue = strValue.c_str();
-        while( *pValue > _T('\0') && *pValue <= _T(' ') ) pValue = ::CharNext(pValue);
-        SetBkColor(pValue);
-    }
+		while (*pValue > _T('\0') && *pValue <= _T(' ')) pValue = ::CharNext(pValue);
+		SetBkColor(pValue);
+	}
 	else if (strName == _T("bordersize")) {
 		std::wstring nValue = strValue;
 		if (nValue.find(',') == std::wstring::npos) {
@@ -1002,13 +1114,14 @@ void Control::SetAttribute(const std::wstring& strName, const std::wstring& strV
 			SetBorderSize(rcBorder);
 		}
 	}
-    else if( strName == _T("borderround") ) {
-        CSize cxyRound;
-        LPTSTR pstr = NULL;
-        cxyRound.cx = _tcstol(strValue.c_str(), &pstr, 10);  ASSERT(pstr);    
-        cxyRound.cy = _tcstol(pstr + 1, &pstr, 10);    ASSERT(pstr);     
-        SetBorderRound(cxyRound);
-    }
+	else if (strName == _T("borderround")) {
+		CSize cxyRound;
+		LPTSTR pstr = NULL;
+		cxyRound.cx = _tcstol(strValue.c_str(), &pstr, 10);  ASSERT(pstr);
+		cxyRound.cy = _tcstol(pstr + 1, &pstr, 10);    ASSERT(pstr);
+		SetBorderRound(cxyRound);
+	}
+	else if (strName == _T("boxshadow")) SetBoxShadow(strValue);
 	else if( strName == _T("width") ) {
 		if ( strValue == _T("stretch") ) {
 			SetFixedWidth(DUI_LENGTH_STRETCH);
@@ -1103,6 +1216,8 @@ void Control::SetAttribute(const std::wstring& strName, const std::wstring& strV
 	else if (strName == _T("tooltiptext")) SetToolTipText(strValue);
 	else if (strName == _T("tooltiptextid")) SetToolTipTextId(strValue);
 	else if (strName == _T("dataid")) SetDataID(strValue);
+	else if (strName == _T("menupopup")) SetMenuPopup(strValue);
+	else if (strName == _T("menualign")) SetMenuAlign(strValue);
 	else if (strName == _T("enabled")) SetEnabled(strValue == _T("true"));
 	else if (strName == _T("mouse")) SetMouseEnabled(strValue == _T("true"));
 	else if (strName == _T("keyboard")) SetKeyboardEnabled(strValue == _T("true"));
@@ -1130,10 +1245,13 @@ void Control::SetAttribute(const std::wstring& strName, const std::wstring& strV
 	else if (strName == _T("fadeinoutyfromtop")) m_animationManager.SetFadeInOutY(strValue == _T("true"), false);
 	else if (strName == _T("fadeinoutyfrombottom")) m_animationManager.SetFadeInOutY(strValue == _T("true"), true);
 	else if (strName == _T("receivepointer")) SetReceivePointerMsg(strValue == _T("true"));
-    else
-    {
-        ASSERT(FALSE);
-    }
+	else if (strName == _T("tabstop")) SetTabStop(strValue == _T("true"));
+  else if (strName == _T("loadingimage")) SetLoadingImage(strValue);
+  else if (strName == _T("loadingbkcolor")) SetLoadingBkColor(strValue);
+  else if (strName == _T("ellipsebkground")) SetEllipseBkground(strValue == _T("true"));
+	else {
+	ASSERT(FALSE);
+	}
 }
 
 void Control::SetClass(const std::wstring& strClass)
@@ -1206,14 +1324,11 @@ bool Control::OnApplyAttributeList(const std::wstring& strReceiver, const std::w
 
 void Control::GetImage(Image& duiImage) const
 {
-	if (duiImage.imageCache) {
-		return;
-	}
+	// should optimize later
+	// use hash or md5 is better than compare strings
 	std::wstring sImageName = duiImage.imageAttribute.sImageName;
-	std::wstring imageFullPath = sImageName;
-	if (::PathIsRelative(sImageName.c_str())) {
-		imageFullPath = GlobalManager::GetResourcePath() + m_pWindow->GetWindowResourcePath() + sImageName;
-	}
+	std::wstring imageFullPath = GlobalManager::GetResPath(sImageName, m_pWindow->GetWindowResourcePath());
+
 	imageFullPath = StringHelper::ReparsePath(imageFullPath);
 
 	if (!duiImage.imageCache || duiImage.imageCache->sImageFullPath != imageFullPath) {
@@ -1262,8 +1377,19 @@ bool Control::DrawImage(IRenderContext* pRender, Image& duiImage, const std::wst
 	else {
 		int iFade = nFade == DUI_NOSET_VALUE ? newImageAttribute.bFade : nFade;
 		ImageInfo* imageInfo = duiImage.imageCache.get();
-		pRender->DrawImage(m_rcPaint, duiImage.GetCurrentHBitmap(), imageInfo->IsAlpha(),
-			rcNewDest, rcNewSource, newImageAttribute.rcCorner, iFade, newImageAttribute.bTiledX, newImageAttribute.bTiledY);
+		
+
+		CSize scrollPos{ 0,0 };
+		auto scrollableBox = dynamic_cast<ScrollableBox*>(this);
+		if (scrollableBox) {
+			scrollPos = scrollableBox->GetScrollPos();
+		}
+
+		pRender->DrawImage(m_rcPaint, scrollPos,
+			duiImage.GetCurrentHBitmap(), imageInfo->IsAlpha(),
+			rcNewDest, rcNewSource, newImageAttribute.rcCorner, imageInfo->IsSvg(), iFade,
+			newImageAttribute.bTiledX, newImageAttribute.bTiledY, newImageAttribute.bFullTiledX, newImageAttribute.bFullTiledY,
+			newImageAttribute.nTiledMargin);
 	}
 
 	return true;
@@ -1309,20 +1435,20 @@ void Control::AlphaPaint(IRenderContext* pRender, const UiRect& rcPaint)
 				SetCacheDirty(true);
 			}
 
-			// IsCacheDirty与m_bCacheDirty意义不一样
+			// IsCacheDirty~{Sk~}m_bCacheDirty~{RbRe2;R;Qy~}
 			if (m_bCacheDirty) {
 				pCacheRender->Clear();
-				UiRect rcClip = { 0, 0, size.cx, size.cy };
-				AutoClip alphaClip(pCacheRender, rcClip, m_bClip);
+        PaintShadow(pCacheRender);
+        UiRect rcClip = { 0, 0, size.cx, size.cy };
+        AutoClip alphaClip(pCacheRender, rcClip, m_bClip);
 				AutoClip roundAlphaClip(pCacheRender, rcClip, m_cxyBorderRound.cx, m_cxyBorderRound.cy, bRoundClip);
 
-				bool bOldCanvasTrans = m_pWindow->SetRenderTransparent(true);
+				pCacheRender->SetRenderTransparent(true);
 				CPoint ptOffset(m_rcItem.left + m_renderOffset.x, m_rcItem.top + m_renderOffset.y);
 				CPoint ptOldOrg = pCacheRender->OffsetWindowOrg(ptOffset);
 				Paint(pCacheRender, m_rcItem);
-				PaintChild(pRender, rcPaint);
+				PaintChild(pCacheRender, rcPaint);
 				pCacheRender->SetWindowOrg(ptOldOrg);
-				m_pWindow->SetRenderTransparent(bOldCanvasTrans);
 				SetCacheDirty(false);
 			}
 
@@ -1344,16 +1470,16 @@ void Control::AlphaPaint(IRenderContext* pRender, const UiRect& rcPaint)
 
 			if (IsCacheDirty()) {
 				pCacheRender->Clear();
-				UiRect rcClip = { 0, 0, size.cx, size.cy };
-				AutoClip alphaClip(pCacheRender, rcClip, m_bClip);
+        PaintShadow(pCacheRender);
+        UiRect rcClip = { 0, 0, size.cx, size.cy };
+        AutoClip alphaClip(pCacheRender, rcClip, m_bClip);
 				AutoClip roundAlphaClip(pCacheRender, rcClip, m_cxyBorderRound.cx, m_cxyBorderRound.cy, bRoundClip);
 
-				bool bOldCanvasTrans = m_pWindow->SetRenderTransparent(true);
+				pCacheRender->SetRenderTransparent(true);
 				CPoint ptOffset(m_rcItem.left + m_renderOffset.x, m_rcItem.top + m_renderOffset.y);
 				CPoint ptOldOrg = pCacheRender->OffsetWindowOrg(ptOffset);
 				Paint(pCacheRender, m_rcItem);
 				pCacheRender->SetWindowOrg(ptOldOrg);
-				m_pWindow->SetRenderTransparent(bOldCanvasTrans);
 				SetCacheDirty(false);
 			}
 
@@ -1363,8 +1489,11 @@ void Control::AlphaPaint(IRenderContext* pRender, const UiRect& rcPaint)
 		}
 	}
 	else {
-		AutoClip clip(pRender, m_rcItem, m_bClip);
-		AutoClip roundClip(pRender, m_rcItem, m_cxyBorderRound.cx, m_cxyBorderRound.cy, bRoundClip);
+    PaintShadow(pRender);
+    ui::UiRect rcClipRect = m_rcItem;
+
+    AutoClip clip(pRender, rcClipRect, m_bClip);
+    AutoClip roundClip(pRender, m_rcItem, m_cxyBorderRound.cx, m_cxyBorderRound.cy, bRoundClip);
 		CPoint ptOldOrg = pRender->OffsetWindowOrg(m_renderOffset);
 		Paint(pRender, rcPaint);
 		PaintChild(pRender, rcPaint);
@@ -1374,7 +1503,7 @@ void Control::AlphaPaint(IRenderContext* pRender, const UiRect& rcPaint)
 
 void Control::Paint(IRenderContext* pRender, const UiRect& rcPaint)
 {
-    if( !::IntersectRect(&m_rcPaint, &rcPaint, &m_rcItem) ) return;
+	if( !::IntersectRect(&m_rcPaint, &rcPaint, &m_rcItem) ) return;
 
 	PaintBkColor(pRender);
 	PaintBkImage(pRender);
@@ -1382,6 +1511,22 @@ void Control::Paint(IRenderContext* pRender, const UiRect& rcPaint)
 	PaintStatusImage(pRender);
 	PaintText(pRender);
 	PaintBorder(pRender);
+  PaintLoading(pRender);
+}
+
+void Control::PaintShadow(IRenderContext* pRender)
+{
+	if (!m_boxShadow.HasShadow())
+		return;
+
+	pRender->DrawBoxShadow(m_rcItem,
+		m_cxyBorderRound,
+		m_boxShadow.m_cpOffset,
+		m_boxShadow.m_nBlurRadius,
+		m_boxShadow.m_nBlurSize,
+		m_boxShadow.m_nSpreadSize,
+		GlobalManager::GetTextColor(m_boxShadow.m_strColor),
+		m_boxShadow.m_bExclude);
 }
 
 void Control::PaintBkColor(IRenderContext* pRender)
@@ -1390,10 +1535,15 @@ void Control::PaintBkColor(IRenderContext* pRender)
 		return;
 	}
 
-	DWORD dwBackColor = GlobalManager::GetTextColor(m_strBkColor);
+	DWORD dwBackColor = this->GetWindowColor(m_strBkColor);
 	if(dwBackColor != 0) {
-		if (dwBackColor >= 0xFF000000) pRender->DrawColor(m_rcPaint, dwBackColor);
-		else pRender->DrawColor(m_rcItem, dwBackColor);
+    if (m_bEllipseBkground) {
+      PaintRoundBkColor(pRender);
+    }
+    else {
+      if (dwBackColor >= 0xFF000000) pRender->DrawColor(m_rcPaint, dwBackColor);
+      else pRender->DrawColor(m_rcItem, dwBackColor);
+    }
 	}
 }
 
@@ -1425,7 +1575,7 @@ void Control::PaintBorder(IRenderContext* pRender)
 	}
 	DWORD dwBorderColor = 0;
 	if (!m_strBorderColor.empty()) {
-		dwBorderColor = GlobalManager::GetTextColor(m_strBorderColor);
+		dwBorderColor = this->GetWindowColor(m_strBorderColor);
 	}
 
 	if (dwBorderColor != 0) {
@@ -1486,6 +1636,113 @@ void Control::PaintBorder(IRenderContext* pRender)
 	}
 }
 
+void Control::PaintLoading(IRenderContext* pRender) {
+  if (!m_bIsLoading || m_loadingImage.imageAttribute.sImageName.empty()) {
+    return;
+  }
+
+  GetImage(m_loadingImage);
+  if (!m_loadingImage.imageCache) {
+    ASSERT(FALSE);
+    return;
+  }
+
+  Gdiplus::Bitmap* image = GdiHelper::CreateBitmapFromHBITMAP(m_loadingImage.imageCache->GetHBitmap(0));
+  if (!image) {
+    ASSERT(FALSE);
+    return;
+  }
+
+  UiRect rcNewDest;
+  ui::UiRect rcDest = m_loadingImage.imageAttribute.rcDest;
+  if (rcDest.left != DUI_NOSET_VALUE && rcDest.top != DUI_NOSET_VALUE
+    && rcDest.right != DUI_NOSET_VALUE && rcDest.bottom != DUI_NOSET_VALUE) {
+    rcNewDest.left = m_rcItem.left + rcDest.left;
+    rcNewDest.right = m_rcItem.left + rcDest.right;
+    rcNewDest.top = m_rcItem.top + rcDest.top;
+    rcNewDest.bottom = m_rcItem.top + rcDest.bottom;
+  }
+  UiRect rcNewSource = m_loadingImage.imageAttribute.rcSource;
+  if (rcNewSource.left == DUI_NOSET_VALUE || rcNewSource.top == DUI_NOSET_VALUE
+    || rcNewSource.right == DUI_NOSET_VALUE || rcNewSource.bottom == DUI_NOSET_VALUE) {
+    rcNewSource.left = 0;
+    rcNewSource.top = 0;
+    rcNewSource.right = m_loadingImage.imageCache->nX;
+    rcNewSource.bottom = m_loadingImage.imageCache->nY;
+  }
+
+  if (!m_strLoadingBkColor.empty()) {
+    Gdiplus::SolidBrush brush(GetWindowColor(m_strLoadingBkColor));
+    ui::UiRect rcFill = m_rcItem;
+    rcFill.left = m_rcItem.left + (m_rcItem.GetWidth() - image->GetWidth()) / 2;
+    rcFill.right = rcFill.left + image->GetWidth();
+    rcFill.top = m_rcItem.top + (m_rcItem.GetHeight() - image->GetHeight()) / 2;
+    rcFill.bottom = rcFill.top + image->GetHeight();
+
+    if (!rcNewDest.IsRectEmpty()) {
+      rcFill = rcNewDest;
+    }
+
+    pRender->DrawColor(rcFill, GetWindowColor(m_strLoadingBkColor));
+  }
+
+  Gdiplus::Bitmap tempBitmap(image->GetWidth(), image->GetHeight());
+  Gdiplus::Graphics temp_render(&tempBitmap);
+
+  Gdiplus::Matrix matrix;
+  temp_render.GetTransform(&matrix);
+  matrix.RotateAt(static_cast<float>(m_fCurrrentAngele), Gdiplus::PointF(image->GetWidth() / 2, image->GetHeight() / 2));
+  temp_render.SetTransform(&matrix);
+
+  temp_render.DrawImage(image, 0.f, 0.f);
+
+  if (rcNewDest.IsRectEmpty()) {
+    rcNewDest.left = m_rcItem.left + (GetWidth() - rcNewSource.GetWidth()) / 2;
+    rcNewDest.right = rcNewDest.left + rcNewSource.GetWidth();
+    rcNewDest.top = m_rcItem.top + (GetHeight() - rcNewSource.GetHeight()) / 2;
+    rcNewDest.bottom = rcNewDest.top + rcNewSource.GetHeight();
+  }
+
+  Gdiplus::Graphics graphics(pRender->GetDC());
+  graphics.DrawImage(&tempBitmap,
+      Gdiplus::RectF(rcNewDest.left, rcNewDest.top, rcNewDest.GetWidth(), rcNewDest.GetHeight()),
+      rcNewSource.left, rcNewSource.top, rcNewSource.GetWidth(), rcNewSource.GetHeight(),
+      Gdiplus::UnitPixel);
+
+  delete image;
+}
+
+void Control::PaintRoundBkColor(IRenderContext* pRender) {
+  int width = GetPos().GetWidth();
+  int height = GetPos().GetHeight();
+
+  DWORD dwBackColor = this->GetWindowColor(m_strBkColor);
+
+  if (width == height) {
+    pRender->FillCircle(m_rcItem, dwBackColor);
+
+    return;
+  }
+
+  Path_Gdiplus path;
+  int radius = 0;
+
+  if (width > height) {
+    radius = height / 2;
+    path.AddArc(m_rcItem.left, m_rcItem.top, height, height, 90, 180);
+    path.AddArc(m_rcItem.right - height - 1, m_rcItem.top, height, height, 270, 180);
+    path.CloseFigure();
+  } else {
+    radius = width / 2;
+    path.AddArc(m_rcItem.left, m_rcItem.top, width, width, 180, 180);
+    path.AddArc(m_rcItem.left , m_rcItem.bottom - width - 1, width, width, 0, 180);
+    path.CloseFigure();
+  }
+
+  Brush_Gdiplus brush(dwBackColor);
+  pRender->FillPath(&path, &brush);
+}
+
 void Control::SetAlpha(int alpha)
 {
 	ASSERT(alpha >= 0 && alpha <= 255);
@@ -1498,6 +1755,11 @@ void Control::SetHotAlpha(int nHotAlpha)
 	ASSERT(nHotAlpha >= 0 && nHotAlpha <= 255);
 	m_nHotAlpha = nHotAlpha;
 	Invalidate();
+}
+
+void Control::SetTabStop(bool enable)
+{
+	m_bAllowTabstop = enable;
 }
 
 void Control::SetRenderOffset(CPoint renderOffset)
@@ -1547,7 +1809,7 @@ void Control::GifPlay()
 		}
 		else
 		{
-			if (lPrePause == 0 || lPause == 0) {//0表示GetCurrentInterval出错
+			if (lPrePause == 0 || lPause == 0) {//0~{1mJ>~}GetCurrentInterval~{3v4m~}
 				m_bkImage.SetPlaying(false);
 				m_gifWeakFlag.Cancel();
 				return;
@@ -1654,11 +1916,7 @@ void Control::InvokeLoadImageCache()
 	if (sImageName.empty()) {
 		return;
 	}
-	std::wstring imageFullPath = sImageName;
-	if (::PathIsRelative(sImageName.c_str())) {
-		imageFullPath = GlobalManager::GetResourcePath() + m_pWindow->GetWindowResourcePath() + sImageName;
-	}
-	imageFullPath = StringHelper::ReparsePath(imageFullPath);
+	std::wstring imageFullPath = GlobalManager::GetResPath(sImageName, m_pWindow->GetWindowResourcePath());
 
 	if (!m_bkImage.imageCache || m_bkImage.imageCache->sImageFullPath != imageFullPath) {
 		auto shared_image = GlobalManager::IsImageCached(imageFullPath);
@@ -1688,6 +1946,73 @@ void Control::DetachEvent(EventType type)
 	{
 		OnEvent.erase(event);
 	}
+}
+
+DWORD Control::GetWindowColor(const std::wstring& strName)
+{
+	DWORD color = 0;
+	if (m_pWindow)
+		color = m_pWindow->GetTextColor(strName);
+
+	if (color == 0)
+		color = GlobalManager::GetTextColor(strName);
+
+	ASSERT(color != 0);
+	return color;
+}
+
+void Control::StartLoading(int fStartAngle) {
+  if (fStartAngle >= 0 ) {
+    m_fCurrrentAngele = fStartAngle;
+  }
+  if (m_bIsLoading) {
+    return;
+  }
+
+  m_bIsLoading = true;
+  SetEnabled(false);
+  TimerManager::GetInstance()->AddCancelableTimer(m_loadingImageFlag.GetWeakFlag(), nbase::Bind(&Control::Loading, this),
+      50, TimerManager::REPEAT_FOREVER);
+}
+
+void Control::StopLoading(GifStopType frame) {
+  if (!m_bIsLoading) {
+    return;
+  }
+
+  switch (frame) {
+  case kGifStopFirst:
+    m_fCurrrentAngele = 0;
+    break;
+  case kGifStopCurrent:
+    break;
+  case  kGifStopLast:
+    m_fCurrrentAngele = 360;
+  }
+  m_bIsLoading = false;
+  SetEnabled(true);
+
+  m_loadingImageFlag.Cancel();
+}
+
+void Control::Loading() {
+  if (!m_bIsLoading) {
+    return;
+  }
+  m_fCurrrentAngele += 10;
+  if (m_fCurrrentAngele == INT32_MIN) {
+    m_fCurrrentAngele = 0;
+  }
+
+  Invalidate();
+}
+
+bool Control::IsLoading()  {
+  return m_bIsLoading;
+}
+
+void Control::SetEllipseBkground(bool bEllipseBkground) {
+  m_bEllipseBkground = bEllipseBkground;
 }
 
 } // namespace ui

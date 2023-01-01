@@ -20,7 +20,6 @@ class Box;
 #define UIFIND_TOP_FIRST     0x00000008
 #define UIFIND_ME_FIRST      0x80000000
 
-
 /////////////////////////////////////////////////////////////////////////////////////
 //
 
@@ -29,8 +28,10 @@ typedef struct tagTFontInfo
 	HFONT hFont;
 	std::wstring sFontName;
 	int iSize;
+	int iWeight;
 	bool bBold;
 	bool bUnderline;
+	bool bStrikeout;
 	bool bItalic;
 	TEXTMETRIC tm;
 } TFontInfo;
@@ -60,6 +61,8 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////////////
 //
+
+class UIAWindowProvider;
 
 class UILIB_API Window : public virtual nbase::SupportWeakCallback
 {
@@ -149,6 +152,12 @@ public:
 	 * @return 无
 	 */
 	void ShowModalFake(HWND parent_hwnd);
+
+	/**
+	 * @brief 是否是模态显示
+	 * @return 是否是模态显示
+	 */
+	bool IsFakeModal();
 
 	/**
 	 * @brief 居中窗口，支持扩展屏幕
@@ -298,6 +307,29 @@ public:
 	void RemoveAllClass();
 
 	/**
+	 * @brief 添加一个颜色值提供窗口内使用
+	 * @param[in] strName 颜色名称（如 white）
+	 * @param[in] strValue 颜色具体数值（如 #FFFFFFFF）
+	 * @return 无
+	 */
+	void AddTextColor(const std::wstring& strName, const std::wstring& strValue);
+
+	/**
+	 * @brief 添加一个颜色值提供窗口内使用
+	 * @param[in] strName 颜色名称（如 white）
+	 * @param[in] strValue 颜色具体数值（如 #FFFFFFFF）
+	 * @return 无
+	 */
+	void AddTextColor(const std::wstring& strName, DWORD argb);
+
+	/**
+	 * @brief 根据名称获取一个颜色的具体数值
+	 * @param[in] strName 要获取的颜色名称
+	 * @return 返回 DWORD 格式的颜色描述值
+	 */
+	DWORD GetTextColor(const std::wstring& strName);
+
+	/**
 	 * @brief 添加一个选项组
 	 * @param[in] strGroupName 组名称
 	 * @param[in] pControl 控件指针
@@ -363,7 +395,7 @@ public:
 	 * @param[in] rcCaption 要设置的区域范围
 	 * @return 无
 	 */
-	void SetCaptionRect(UiRect& rcCaption);
+	void SetCaptionRect(UiRect& rcCaption, bool bNeedDpiScale = true);
 
 	/**
 	 * @brief 获取窗口圆角大小，对应 XML 中 roundcorner 属性
@@ -434,6 +466,12 @@ public:
 	void SetShadowAttached(bool bShadowAttached);
 
 	/**
+	* @brief 获取是否附加阴影效果
+	* @return 是否附加阴影效果
+	*/
+	bool IsShadowAttached();
+
+	/**
 	 * @brief 获取阴影图片
 	 * @return 返回阴影图片位置
 	 */
@@ -455,9 +493,10 @@ public:
 	/**
 	 * @brief 指定阴影素材的九宫格描述
 	 * @param[in] rect 九宫格描述信息
+	 * @param[in] bNeedDpiScale 为 false 表示不需要把 rc 根据 DPI 自动调整
 	 * @return 无
 	 */
-	void SetShadowCorner(const UiRect rect);
+	void SetShadowCorner(const UiRect rect, bool bNeedDpiScale = true);
 
 	/**
 	 * @brief 获取窗口位置信息
@@ -503,19 +542,31 @@ public:
 	 * @param[in] cx 宽度
 	 * @param[in] cy 高度
 	 * @param[in] bContainShadow 为 false 表示 cx cy 不包含阴影
+	 * @param[in] bNeedDpiScale 为 false 表示不需要把 rc 根据 DPI 自动调整
 	 * @return 无
 	 */
 	// 
-	void SetMinInfo(int cx, int cy, bool bContainShadow = false);
+	void SetMinInfo(int cx, int cy, bool bContainShadow = false, bool bNeedDpiScale = true);
 
 	/**
 	 * @brief 设置窗口最大范围
 	 * @param[in] cx 宽度
 	 * @param[in] cy 高度
 	 * @param[in] bContainShadow 为 false 表示 cx cy 不包含阴影
+	 * @param[in] bNeedDpiScale 为 false 表示不需要把 rc 根据 DPI 自动调整
 	 * @return 无
 	 */
-	void SetMaxInfo(int cx, int cy, bool bContainShadow = false);
+	void SetMaxInfo(int cx, int cy, bool bContainShadow = false, bool bNeedDpiScale = true);
+
+	/**
+	 * @brief 重置窗口大小
+	 * @param[in] cx 宽度
+	 * @param[in] cy 高度
+	 * @param[in] bContainShadow 为 false 表示 cx cy 不包含阴影
+	 * @param[in] bNeedDpiScale 为 false 表示不根据 DPI 调整
+	 * @return 无
+	 */
+	void Resize(int cx, int cy, bool bContainShadow = false, bool bNeedDpiScale = true);
 
 	/**
 	 * @brief 设置窗口初始大小
@@ -581,7 +632,7 @@ public:
 	 * @param[in] uMsg 消息体
 	 * @param[in] wParam 消息附加参数
 	 * @param[in] lParam 消息附加参数
-	 * @return 返回 true 则继续派发该消息，否则不再派发该消息
+	 * @return 返回 false 则继续派发该消息，否则不再派发该消息
 	 */
 	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -612,6 +663,15 @@ public:
 	 * @return 返回 true 需要发送鼠标进入或离开消息，返回 false 为不需要
 	 */
 	inline bool HandleMouseEnterLeave(const POINT &pt, WPARAM wParam, LPARAM lParam);
+
+	/**
+	 * @brief 释放指定控件的按下状态
+	 * @param[in] bClickOrPointer 单击控件还是触摸控件
+	 * @param[in] wParam 消息附加参数
+	 * @param[in] lParam 消息附加参数
+	 * @return void 无
+	 */
+	void ReleaseEventClick(bool bClickOrPointer, WPARAM wParam, LPARAM lParam);
 
 	/// 焦点相关
 	/**
@@ -836,12 +896,28 @@ public:
 	 * @return 返回上一次绘制状态
 	 */
 	bool SetRenderTransparent(bool bCanvasTransparent);
+	bool IsLayeredWindow();
 
 	/**
 	 * @brief 初始化布局
 	 * @return 无
 	 */
 	virtual void OnInitLayout();
+
+	/**		
+	 * @brief 是否将要关闭
+	 * @return 无
+	 */
+	bool IsClosing(){ return m_bCloseing; };
+
+#if defined(ENABLE_UIAUTOMATION)
+	/**
+     * @brief Get ui automation provider
+     * @return nullptr or pointer
+     */
+	UIAWindowProvider* GetUIAProvider();
+#endif
+
 
 private:
 	static Control* CALLBACK __FindControlFromNameHash(Control* pThis, LPVOID pData);
@@ -884,6 +960,8 @@ protected:
 	Box* m_pRoot;
 	EventMap OnEvent;
 
+	UIAWindowProvider* m_pUIAProvider;
+
 protected:
 	CSize m_szMinWindow;
 	CSize m_szMaxWindow;
@@ -912,8 +990,6 @@ protected:
 	Control* m_pEventKey;
 	CPoint m_ptLastMousePos;
 
-	Control* m_pEventTouch;
-	CPoint m_ptLastTouchPos;
 	Control* m_pEventPointer;
 	bool m_bHandlePointer;
 
@@ -926,6 +1002,7 @@ protected:
 	std::wstring m_strWindowResourcePath; //每个窗口的资源路径,等于GetSkinFolder()
 	TFontInfo m_defaultFontInfo;
 	std::map<std::wstring, std::wstring> m_defaultAttrHash;
+	std::map<std::wstring, DWORD> m_mapTextColor;
 	std::map<std::wstring, std::vector<Control*>> m_mOptionGroup;
 
 	std::vector<IUIMessageFilter*> m_aPreMessageFilters;
@@ -942,6 +1019,7 @@ protected:
 	Shadow m_shadow;
 
 	bool m_bFakeModal = false;
+	bool m_bCloseing = false;	//add by djj 20200428 调用Close时会延迟Post WM_CLOSE, 这个期间需要有一个标识此种'待关闭状态'
 };
 
 } // namespace ui

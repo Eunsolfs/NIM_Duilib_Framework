@@ -15,6 +15,36 @@ TreeNode::TreeNode() :
 	
 }
 
+std::wstring TreeNode::GetType() const
+{
+	return DUI_CTR_TREENODE;
+}
+
+UIAControlProvider* TreeNode::GetUIAProvider()
+{
+#if defined(ENABLE_UIAUTOMATION)
+	if (m_pUIAProvider == nullptr)
+	{
+		m_pUIAProvider = static_cast<UIAControlProvider*>(new (std::nothrow) UIATreeNodeProvider(this));
+	}
+	return m_pUIAProvider;
+#else
+	return nullptr;
+#endif
+}
+
+void TreeNode::SetTreeView(TreeView* pTreeView)
+{
+    m_pTreeView = pTreeView;
+}
+
+bool TreeNode::OnClickItem(EventArgs* pMsg)
+{
+    TreeNode* pItem = static_cast<TreeNode*>(pMsg->pSender);
+    pItem->SetExpand(!pItem->IsExpand(), true);
+    return true;
+}
+
 bool TreeNode::IsVisible() const
 {
 	return ListContainerElement::IsVisible()
@@ -37,25 +67,7 @@ void TreeNode::SetInternVisible(bool bVisible)
 
 void TreeNode::SetWindow(Window* pManager, Box* pParent, bool bInit)
 {
-	for (auto it = m_aTreeNodes.begin(); it != m_aTreeNodes.end(); it++)
-	{
-		(*it)->SetWindow(pManager, this, bInit);
-	}
-
 	ListContainerElement::SetWindow(pManager, pParent, bInit);
-}
-
-void TreeNode::SetTreeView(TreeView* pTreeView)
-{
-	m_pTreeView = pTreeView;
-}
-
-bool TreeNode::OnClickItem(EventArgs* pMsg)
-{
-	TreeNode* pItem = static_cast<TreeNode*>(pMsg->pSender);
-	pItem->SetExpand(!pItem->IsExpand());
-
-	return true;
 }
 
 TreeNode* TreeNode::GetParentNode()
@@ -183,12 +195,19 @@ bool TreeNode::IsExpand() const
 	return m_bExpand;
 }
 
-void TreeNode::SetExpand(bool bExpand)
+void TreeNode::SetExpand(bool bExpand, bool bTriggerEvent)
 {
 	if(m_bExpand == bExpand) {
 		return;
 	}
 	m_bExpand = bExpand;
+
+	if (m_pWindow != NULL) {
+		if (bTriggerEvent) {
+			m_pWindow->SendNotify(this, m_bExpand ? kEventExpand : kEventUnExpand);
+		}
+	}
+
 	m_pTreeView->Arrange();
 }
 
@@ -204,6 +223,11 @@ TreeView::TreeView() :
 {
 	m_rootNode.reset(new TreeNode());
 	m_rootNode->SetTreeView(this);
+}
+
+std::wstring TreeView::GetType() const
+{
+	return DUI_CTR_TREEVIEW;
 }
 
 void TreeView::SetAttribute(const std::wstring& strName, const std::wstring& strValue)
@@ -248,7 +272,7 @@ void TreeView::RemoveAll()
 void TreeView::SetWindow(Window* pManager, Box* pParent, bool bInit)
 {
 	ListBox::SetWindow(pManager, pParent, bInit);
-	if (NULL != pParent) m_rootNode->SetWindow(pManager, pParent, bInit);
+	m_rootNode->SetWindow(pManager, pParent, bInit);
 }
 
 }
