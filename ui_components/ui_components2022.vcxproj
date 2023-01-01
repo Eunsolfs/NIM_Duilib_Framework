@@ -283,7 +283,7 @@
     <ClCompile Include="windows_manager\window_ex.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\third_party\cef_wrapper\libcef_dll_wrapper.vcxproj">
+    <ProjectReference Include="..\third_party\cef_wrapper\libcef_dll_wrapper2022.vcxproj">
       <Project>{a9d6dc71-c0dc-4549-aea0-3b15b44e86a9}</Project>
     </ProjectReference>
   </ItemGroup>
