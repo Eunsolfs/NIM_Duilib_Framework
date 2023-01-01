@@ -213,6 +213,7 @@
       <AdditionalIncludeDirectories>.\;..\</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4100;4127;4244;4245;4310;4355;4505;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -235,6 +236,7 @@
       <AdditionalIncludeDirectories>.\;..\</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4100;4127;4244;4245;4310;4355;4505;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -259,6 +261,7 @@
       <AdditionalIncludeDirectories>.\;..\</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4100;4127;4189;4244;4245;4310;4355;4505;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -284,6 +287,7 @@
       <AdditionalIncludeDirectories>.\;..\</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4100;4127;4189;4244;4245;4310;4355;4505;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <ProgramDataBaseFileName>$(IntDir)$(TargetName).pdb</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
