@@ -32,9 +32,17 @@ x86/
 bld/
 [Oo]bj/
 [Ll]og/
+[Oo]ut/
 
-# Visual Studio 2015/2017 cache/options directory
+# Visual Studio Files
+.github/
 .vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
 
