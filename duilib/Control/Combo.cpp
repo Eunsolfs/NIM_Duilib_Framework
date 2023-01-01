@@ -390,7 +390,11 @@ bool Combo::SelectItem(int iIndex, bool bTrigger)
     Invalidate();
     if (m_pWindow != NULL && bTrigger) {
         m_pWindow->SendNotify(this, kEventSelect, m_iCurSel, -1);
+		return true;
     }
+	else {
+		return false;
+	}
 }
 
 Control* Combo::GetItemAt(int iIndex)
