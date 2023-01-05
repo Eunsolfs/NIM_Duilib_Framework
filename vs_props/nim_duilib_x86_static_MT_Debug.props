@@ -24,22 +24,22 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(nimduilibIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>$(nimduilibPreprocessorDefinitions)%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>$(nimduilibCompilerFlags) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(nimduilibIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>$(nimduilibPreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>$(nimduilibCompilerFlags);%(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(nimduilibLibraryDirectories)%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(nimduilibLibraryDirectories);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(nimduilibLibraries);$(nimduilibSystemDeps);%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalOptions>$(nimduilibLinkerFlags) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>$(nimduilibLinkerFlags);%(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Midl>
-      <AdditionalIncludeDirectories>$(nimduilibIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(nimduilibIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </Midl>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>$(nimduilibIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>$(nimduilibPreprocessorDefinitions)%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>$(nimduilibCompilerFlags) %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(nimduilibIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>$(nimduilibPreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalOptions>$(nimduilibCompilerFlags);%(AdditionalOptions)</AdditionalOptions>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup />

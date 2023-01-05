@@ -3,9 +3,13 @@
 NIM Duilib 包含了一整套桌面软件的开发部件，与其说这是一个界面库，不如说它是一个开发框架。从原有 Duilib 基础上拓展了一些新的能力，并整合了 Google base 基础类库（线程、内存、闭包等）。您完全可以直接使用这个框架来开发任何你想要的桌面应用。
 
 ![GitHub](https://img.shields.io/badge/license-MIT-green.svg)
-[![Build status](https://ci.appveyor.com/api/projects/status/u29yl0j7pasopm3h?svg=true)](https://ci.appveyor.com/project/nmgwddj/nim-duilib-framework) [![Join the chat at https://gitter.im/NIM_Duilib_Framework/community](https://badges.gitter.im/NIM_Duilib_Framework/community.svg)](https://gitter.im/NIM_Duilib_Framework/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[English](README_en-US.md)
+## 修改内容
+
+- 添加VS2022工程，（其他版本工程文件的没有怎么动过）
+- 将所有文件编码改为UTF-8(BOM)，解决中文乱码
+- 借鉴fork tree 上大佬们的修改记录，将一些好的特性、bug修复加进了项目源码
+
 
 ## 特色
 
@@ -26,7 +30,7 @@ NIM Duilib 包含了一整套桌面软件的开发部件，与其说这是一个
 克隆项目到你的磁盘中
 
 ```bash
-git clone https://github.com/netease-im/NIM_Duilib_Framework
+git clone https://github.com/Eunsolfs/NIM_Duilib_Framework
 ```
 
 进入 `NIM_Duilib_Framework/examples` 目录，使用 Visual Studio 2013 Update 5 以上版本 IDE 打开 `examples.sln`，按下 F7 即可编译所有示例程序
@@ -46,9 +50,3 @@ git clone https://github.com/netease-im/NIM_Duilib_Framework
 ├─`examples` 各类示例程序源代码  
 ├─`third_party` 第三方库，目前仅有 cef_control 有依赖  
 ├─`ui_components` 基于 duilib 封装的常用组件库如 `msgbox`、`toast`、`cef_control` 等  
-
-## 交流
-
- - 遇到问题：欢迎查看我们整理过的[中文文档](docs/SUMMARY.md)参考[示例程序](examples/README.md)来帮助你解决疑惑
- - 提交缺陷：在确保使用最新版本依然存在问题时请尽量以简洁的语言描述清楚复现该问题的步骤并提交 issue
- - 功能建议：如果你有什么好的想法或者提案，欢迎提交 issue 与我们交流
