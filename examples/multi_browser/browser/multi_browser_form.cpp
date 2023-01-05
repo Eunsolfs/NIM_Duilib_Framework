@@ -27,11 +27,11 @@ MultiBrowserForm::MultiBrowserForm()
 {
 	btn_max_restore_ = nullptr;
 
-	drop_helper_ = NULL;
+	drop_helper_ = nullptr;
 
-	tab_list_ = NULL;
-	borwser_box_tab_ = NULL;
-	active_browser_box_ = NULL;
+	tab_list_ = nullptr;
+	borwser_box_tab_ = nullptr;
+	active_browser_box_ = nullptr;
 
 	is_drag_state_ = false;
 	old_drag_point_.x = old_drag_point_.y = 0;

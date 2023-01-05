@@ -14,6 +14,10 @@ BrowserBox::BrowserBox(std::string id)
 	browser_id_ = id;
 }
 
+BrowserBox::~BrowserBox() {
+
+}
+
 MultiBrowserForm* BrowserBox::GetBrowserForm() const
 {
 	ASSERT(NULL != browser_form_);
