@@ -6,20 +6,9 @@
     <Root>F:\VS_Project\C++\C++UI\NIM_Duilib_Framework</Root>
   </PropertyGroup>
   <PropertyGroup Label="nimduilib_Variables">
-    <nimduilibPackageName></nimduilibPackageName>
-    <nimduilibPackageVersion></nimduilibPackageVersion>
-    <nimduilibCompilerFlags></nimduilibCompilerFlags>
-    <nimduilibLinkerFlags></nimduilibLinkerFlags>
-    <nimduilibPreprocessorDefinitions></nimduilibPreprocessorDefinitions>
     <nimduilibIncludeDirectories>F:\VS_Project\C++\C++UI\NIM_Duilib_Framework;</nimduilibIncludeDirectories>
-    <nimduilibResourceDirectories>
-    </nimduilibResourceDirectories>
-    <nimduilibLibraryDirectories>F:\VS_Project\C++\C++UI\NIM_Duilib_Framework\libs\x64\;</nimduilibLibraryDirectories>
-    <nimduilibBinaryDirectories>
-    </nimduilibBinaryDirectories>
-    <nimduilibLibraries>base.lib;duilib.lib;ui_components.lib;libcef_dll_wrapper.lib;nim_libcef.lib;</nimduilibLibraries>
-    <nimduilibSystemDeps>
-    </nimduilibSystemDeps>
+    <nimduilibLibraryDirectories>F:\VS_Project\C++\C++UI\NIM_Duilib_Framework\libs\x64;</nimduilibLibraryDirectories>
+    <nimduilibLibraries>base.lib;duilib.lib;ui_components.lib;</nimduilibLibraries>
   </PropertyGroup>
   <PropertyGroup>
     <LocalDebuggerEnvironment>PATH=%PATH%;</LocalDebuggerEnvironment>
@@ -27,22 +16,17 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(nimduilibIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>$(nimduilibPreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>$(nimduilibCompilerFlags);%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(nimduilibIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(nimduilibLibraryDirectories);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(nimduilibLibraries);$(nimduilibSystemDeps);%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalOptions>$(nimduilibLinkerFlags);%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(nimduilibLibraryDirectories)%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(nimduilibLibraries)%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Midl>
-      <AdditionalIncludeDirectories>$(nimduilibIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(nimduilibIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </Midl>
     <ResourceCompile>
-      <AdditionalIncludeDirectories>$(nimduilibIncludeDirectories);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>$(nimduilibPreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>$(nimduilibCompilerFlags);%(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(nimduilibIncludeDirectories)%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup />
