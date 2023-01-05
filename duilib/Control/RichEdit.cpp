@@ -2245,21 +2245,17 @@ void RichEdit::SetEnabled(bool bEnable /*= true*/)
 
 //修复了RichEdit同时设置Width和Height为Auto时无法计算高度的问题（此时必须设置MaxWidth）
 //https://github.com/xmcy0011/NIM_Duilib_Framework/commit/abea331f570c903228d333cda83358dcf7cec887
-SIZE CalWstringWidth(const std::wstring& name, const std::wstring& strFontId, UINT m_uTextStyle) {
+SIZE RichEdit::CalWstringWidth(const std::wstring& name, const std::wstring& strFontId, UINT m_uTextStyle) {
 	HDC hDC = ::GetDC(NULL);
-
 	HFONT hFont = GlobalManager::GetFont(strFontId);
-
 	SelectObject(hDC, hFont);
 	LPCTSTR  string = name.c_str();
 	SIZE size = { 0 };
 	GetTextExtentPoint32(hDC, string, _tcslen(string), &size);
 	//RECT rect = { 0 };
 	//::DrawText(hDC, string, _tcslen(string), &rect, m_uTextStyle);
-
 	SelectObject(hDC, hFont);
 	DeleteDC(hDC);
-
 	//int str_width = std::abs(rect.right - rect.left);
 	return size;
 }

@@ -96,6 +96,20 @@ LRESULT MultiBrowserForm::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		else if (wParam == SIZE_MAXIMIZED)
 			OnWndSizeMax(true);
 	}
+	else if (uMsg == WM_SETFOCUS) { // fixed by xmcy0011@sina.com win7下最大化最小化时，libcef3网页无法直接滚动鼠标
+		//fixed win7下最大化最小化时，libcef3网页无法直接连接滚动鼠标标签 
+		// https://github.com/xmcy0011/NIM_Duilib_Framework/commit/7305b49227a53f6ed76b86367db814c05bb4dd7d
+		//fixed  WM_NCCALCSIZE -> 使用WM_SETFOCUS代替，win7会收到WM_SIZE，但有时还无法滚动
+		//https://github.com/xmcy0011/NIM_Duilib_Framework/commit/c6f3361b00a149b9697fe71ffda78cfbddfa2000
+		if (active_browser_box_ != nullptr && active_browser_box_->GetCefControl() != nullptr) {
+			ui::EventArgs e;
+			e.Type = kEventInternalSetFocus;
+			auto ctrl = dynamic_cast<CefNativeControl*>(active_browser_box_->GetCefControl());
+			if (ctrl != nullptr) {
+				ctrl->HandleMessage(e);
+			}
+		}
+	}
 	else if (uMsg == WM_KEYDOWN)
 	{
 		// 处理Ctrl+Tab快捷键

@@ -690,6 +690,9 @@ public:
 	virtual UIAControlProvider* GetUIAProvider() override;
 	virtual void DoInit() override;
 	virtual void SetEnabled(bool bEnable = true) override;
+	//修复了RichEdit同时设置Width和Height为Auto时无法计算高度的问题（此时必须设置MaxWidth）
+	//https://github.com/xmcy0011/NIM_Duilib_Framework/commit/abea331f570c903228d333cda83358dcf7cec887
+	SIZE CalWstringWidth(const std::wstring& name, const std::wstring& strFontId, UINT m_uTextStyle);
 	virtual CSize EstimateSize(CSize szAvailable) override;
 	virtual CSize EstimateText(CSize szAvailable);
 	virtual void SetPos(UiRect rc) override;
