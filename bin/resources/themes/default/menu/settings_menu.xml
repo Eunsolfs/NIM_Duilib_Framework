@@ -20,6 +20,15 @@
         <Label class="menu_text" text="Statically created"/>
       </MenuElement>
     </MenuElement>
+    <MenuElement class="menu_element" name="submenu_test" width="180">
+      <Button width="auto" height="auto" bkimage="menu_logs.png" valign="center" mouse="false"/>
+      <Label class="menu_text" text="SubMenu Test" margin="30,0,0,0"/>
+      <MenuElement class="menu_element" name="sub_menu" width="180">
+        <Label class="menu_text" text="SubMenu 1 created"/>
+        <Label class="menu_text" text="SubMenu 2 created"/>
+        <Label class="menu_text" text="SubMenu 3 created"/>
+      </MenuElement>
+    </MenuElement>
     <MenuElement class="menu_element" name="about" width="180">
       <Button width="auto" height="auto" bkimage="menu_about.png" valign="center" mouse="false"/>
       <Label class="menu_text" text="About" margin="30,0,0,0"/>

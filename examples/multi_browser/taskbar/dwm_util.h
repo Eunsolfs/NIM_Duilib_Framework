@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #define WM_DWMSENDICONICTHUMBNAIL           0x0323
 #define WM_DWMSENDICONICLIVEPREVIEWBITMAP   0x0326

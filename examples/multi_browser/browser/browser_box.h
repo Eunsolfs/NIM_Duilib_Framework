@@ -1,4 +1,4 @@
-/** @file browser_box.h
+﻿/** @file browser_box.h
 * @brief 标签页盒子
 * @copyright (c) 2016, NetEase Inc. All rights reserved
 * @author Redrain

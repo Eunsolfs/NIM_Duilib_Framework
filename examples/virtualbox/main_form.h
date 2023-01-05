@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "VirtualTileBox.h"
 #include "provider.h"
 

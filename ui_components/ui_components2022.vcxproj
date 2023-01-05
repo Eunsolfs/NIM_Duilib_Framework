@@ -202,6 +202,7 @@
     <ClInclude Include="grid\Grid.h" />
     <ClInclude Include="grid\GridBase.h" />
     <ClInclude Include="grid\GridBody.h" />
+    <ClInclude Include="menu\observer_impl_base.hpp" />
     <ClInclude Include="mini_blink_control\wke_memory_dc.h" />
     <ClInclude Include="mini_blink_control\web_view_base.h" />
     <ClInclude Include="mini_blink_control\wke_web_native.h" />

@@ -1,4 +1,7 @@
-#pragma once
+﻿#pragma once
+
+#pragma warning(disable:4996 4018 4032)
+
 #include "GridBase.h"
 
 namespace ui

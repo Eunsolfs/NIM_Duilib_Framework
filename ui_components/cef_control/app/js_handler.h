@@ -1,4 +1,4 @@
-/** @file js_handler.h
+﻿/** @file js_handler.h
  * @brief 定义一个C++与JS进行交互的JsHandler类
  * @copyright (c) 2016, NetEase Inc. All rights reserved
  * @author Redrain

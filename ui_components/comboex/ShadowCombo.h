@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace nim_comp
 {
@@ -189,6 +189,18 @@ public:
   * @return 无
   */
   void SetArrowOffset(int offset, bool bNeedDpiScale = true);
+
+  /**
+  * @brief 设置不同状态下border的颜色
+  * @return 无
+  */
+  void SetBorderColor(ControlStateType stateType, const std::wstring& strColor);
+
+  /**
+  * @brief 获取不同状态下border的颜色
+  * @return 返回border的颜色
+  */
+  std::wstring GetBorderColor(ControlStateType stateType);
 
   /**
    * @brief 监听子项被选择事件

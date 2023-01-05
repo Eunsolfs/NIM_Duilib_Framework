@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 class RichlistForm : public ui::WindowImplBase
 {

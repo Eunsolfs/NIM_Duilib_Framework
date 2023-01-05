@@ -1,3 +1,5 @@
+﻿#pragma warning(disable:4996)
+
 #include "StdAfx.h"
 #include "GridBody.h"
 #include "Grid.h"

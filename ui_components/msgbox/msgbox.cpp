@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "msgbox.h"
 
 namespace nim_comp {

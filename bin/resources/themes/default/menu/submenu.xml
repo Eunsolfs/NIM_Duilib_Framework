@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Window>
   <VListBox class="menu" name="submenu">
-   
+    <MenuElement class="menu_element" name="submenu_first" width="180">
+      <Button width="auto" height="auto" bkimage="menu_settings.png" valign="center" mouse="false"/>
+      <Label class="menu_text" text="System settings" margin="30,0,0,0"/>
+    </MenuElement>
+    <MenuElement class="menu_element" name="submenu_second" width="180">
+      <Button width="auto" height="auto" bkimage="menu_proxy.png" valign="center" mouse="false"/>
+      <Label class="menu_text" text="Proxy settings" margin="30,0,0,0"/>
+    </MenuElement>
+    <MenuElement class="menu_element" name="submenu_third" width="180">
+      <Button width="auto" height="auto" bkimage="menu_logs.png" valign="center" mouse="false"/>
+      <Label class="menu_text" text="Logs directory" margin="30,0,0,0"/>
+    </MenuElement>
   </VListBox>
 </Window>

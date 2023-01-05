@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "cef_form.h"
 
 const std::wstring CefForm::kClassName = L"CEF_Control_Example";

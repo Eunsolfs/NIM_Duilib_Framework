@@ -1,4 +1,4 @@
-/** @file browser_handler.h
+﻿/** @file browser_handler.h
   * @brief 实现CefClient接口，处理Cef浏览器对象发出的各个事件和消息，并与上层控件进行数据交互
   * @copyright (c) 2016, NetEase Inc. All rights reserved
   * @author Redrain

@@ -1,4 +1,4 @@
-/** @file multi_browser_form.h
+﻿/** @file multi_browser_form.h
 * @brief 离屏模式Cef多标签浏览器窗口
 * @copyright (c) 2016, NetEase Inc. All rights reserved
 * @author Redrain

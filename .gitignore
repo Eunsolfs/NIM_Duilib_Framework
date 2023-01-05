@@ -36,6 +36,7 @@ bld/
 
 # Visual Studio Files
 *.lnk
+.vscode/
 .github/
 .vs/
 *.sln

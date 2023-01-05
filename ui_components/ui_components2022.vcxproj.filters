@@ -204,6 +204,9 @@
     <ClInclude Include="mini_blink_control\wke_web_native.h">
       <Filter>mini_blink_control</Filter>
     </ClInclude>
+    <ClInclude Include="menu\observer_impl_base.hpp">
+      <Filter>menu</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

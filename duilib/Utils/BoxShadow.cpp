@@ -20,7 +20,7 @@ void ui::BoxShadow::SetBoxShadowString(const std::wstring& strBoxShadow)
 	std::wstring sItem;
 	std::wstring sValue;
 	LPTSTR pstr = NULL;
-	bool bScaleDest = true;
+	//bool bScaleDest = true; 多余的参数
 
 	LPCTSTR pStrKey = strBoxShadow.c_str();
 	while (*pStrKey != _T('\0')) {

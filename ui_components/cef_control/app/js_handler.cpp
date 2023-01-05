@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "js_handler.h"
 #include "cef_control/util/util.h"
 #include "cef_control/app/ipc_string_define.h"

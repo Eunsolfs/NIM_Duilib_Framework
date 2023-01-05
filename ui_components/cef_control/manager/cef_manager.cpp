@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "cef_manager.h"
 #include "include/wrapper/cef_closure_task.h"
 #include "include/base/cef_bind.h"

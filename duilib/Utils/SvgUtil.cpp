@@ -85,7 +85,7 @@ std::unique_ptr<ui::ImageInfo> SvgUtil::LoadImageBySvg(void *data, const std::ws
 	ReleaseDC(NULL, hdc);
 
 	if (!hBitmap) {
-		DWORD err = GetLastError();
+		DWORD err = GetLastError();//未使用的变量
 		ASSERT(FALSE);
 		return nullptr;
 	}

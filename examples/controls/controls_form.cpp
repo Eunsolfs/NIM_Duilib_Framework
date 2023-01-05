@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "controls_form.h"
 #include "about_form.h"
 #include "../../ui_components/comboex/FilterCombo.h"

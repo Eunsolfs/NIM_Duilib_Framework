@@ -1,4 +1,4 @@
-/** @file cef_manager.h
+﻿/** @file cef_manager.h
  * @brief 管理Cef组件的初始化、销毁、消息循环
  * @copyright (c) 2016, NetEase Inc. All rights reserved
  * @author Redrain

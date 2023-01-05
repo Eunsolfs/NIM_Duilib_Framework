@@ -1,4 +1,4 @@
-/** @file memory_dc.h
+﻿/** @file memory_dc.h
  * @brief 内存dc类，维护HBITMAP与HDC对象，方便快速的储存位图数据
  * @copyright (c) 2016, NetEase Inc. All rights reserved
  * @author Redrain

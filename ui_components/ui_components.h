@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "msgbox/msgbox.h"
 #include "menu/ui_menu.h"

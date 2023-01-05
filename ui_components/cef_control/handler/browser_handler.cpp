@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "browser_handler.h"
 #include "include/cef_frame.h"
 #include "cef_control/manager/cef_manager.h"

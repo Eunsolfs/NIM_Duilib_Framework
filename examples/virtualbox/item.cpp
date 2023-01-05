@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "item.h"
 #include "VirtualTileBox.h"
 #include "provider.h"

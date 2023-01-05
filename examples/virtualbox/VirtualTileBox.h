@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 typedef std::function<void(int nStartIndex, int nEndIndex)> DataChangedNotify;
 typedef std::function<void()> CountChangedNotify;

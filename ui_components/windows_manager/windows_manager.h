@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "window_ex.h"
 
 namespace nim_comp
