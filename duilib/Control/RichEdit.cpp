@@ -1443,6 +1443,15 @@ void RichEdit::SetText(const std::wstring& strText)
 	RaiseUIAValueEvent(oldText, strText);
 
 	m_linkInfo.clear();
+
+	//修复了RichEdit同时设置Width和Height为Auto时无法计算高度的问题（此时必须设置MaxWidth）
+	//https://github.com/xmcy0011/NIM_Duilib_Framework/commit/abea331f570c903228d333cda83358dcf7cec887
+	if (this->GetFixedWidth() == DUI_LENGTH_AUTO || this->GetFixedHeight() == DUI_LENGTH_AUTO) {
+		this->ArrangeAncestor();
+	}
+	else {
+		this->Invalidate();
+	}
 }
 
 void RichEdit::SetTextId(const std::wstring& strTextId)
@@ -2234,18 +2243,54 @@ void RichEdit::SetEnabled(bool bEnable /*= true*/)
 	}
 }
 
+//修复了RichEdit同时设置Width和Height为Auto时无法计算高度的问题（此时必须设置MaxWidth）
+//https://github.com/xmcy0011/NIM_Duilib_Framework/commit/abea331f570c903228d333cda83358dcf7cec887
+SIZE CalWstringWidth(const std::wstring& name, const std::wstring& strFontId, UINT m_uTextStyle) {
+	HDC hDC = ::GetDC(NULL);
+
+	HFONT hFont = GlobalManager::GetFont(strFontId);
+
+	SelectObject(hDC, hFont);
+	LPCTSTR  string = name.c_str();
+	SIZE size = { 0 };
+	GetTextExtentPoint32(hDC, string, _tcslen(string), &size);
+	//RECT rect = { 0 };
+	//::DrawText(hDC, string, _tcslen(string), &rect, m_uTextStyle);
+
+	SelectObject(hDC, hFont);
+	DeleteDC(hDC);
+
+	//int str_width = std::abs(rect.right - rect.left);
+	return size;
+}
+
 CSize RichEdit::EstimateSize(CSize szAvailable)
 {
 	CSize size(GetFixedWidth(), GetFixedHeight());
 	if (size.cx == DUI_LENGTH_AUTO || size.cy == DUI_LENGTH_AUTO) {
 		LONG iWidth = size.cx;
 		LONG iHeight = size.cy;
-		if (size.cx == DUI_LENGTH_AUTO) {
-			ASSERT(size.cy != DUI_LENGTH_AUTO);
+		//if (size.cx == DUI_LENGTH_AUTO) {
+		//	ASSERT(size.cy != DUI_LENGTH_AUTO);
+		//	iWidth = 0;
+		//}
+		//else if (size.cy == DUI_LENGTH_AUTO) {			
+		//	ASSERT(size.cx != DUI_LENGTH_AUTO);
+		//	iHeight = 0;
+		//}
+
+		//修复了RichEdit同时设置Width和Height为Auto时无法计算高度的问题（此时必须设置MaxWidth）
+		//https://github.com/xmcy0011/NIM_Duilib_Framework/commit/abea331f570c903228d333cda83358dcf7cec887
+		if (size.cx == DUI_LENGTH_AUTO && size.cy == DUI_LENGTH_AUTO) {
+			// fixed_by xmcy0011@sina.com 2021-04-22 设置width=auto && height=auto时，RichEdit无法自动计算宽高的问题
+			// 此时要设置最大宽度，否则无法计算。
+			ASSERT(GetMaxWidth() != 9999999);
+			iWidth = GetMaxWidth();
+		}
+		else if (size.cx == DUI_LENGTH_AUTO) {
 			iWidth = 0;
 		}
 		else if (size.cy == DUI_LENGTH_AUTO) {
-			ASSERT(size.cx != DUI_LENGTH_AUTO);
 			iHeight = 0;
 		}
 
@@ -2260,10 +2305,17 @@ CSize RichEdit::EstimateSize(CSize szAvailable)
 			&iWidth,
 			&iHeight);
 		
+		//if (size.cx == DUI_LENGTH_AUTO) {
+		//	size.cx = iWidth + m_pLayout->GetPadding().left + m_pLayout->GetPadding().right;
+		//}
+		//else if (size.cy == DUI_LENGTH_AUTO) {
+		//	size.cy = iHeight + m_pLayout->GetPadding().top + m_pLayout->GetPadding().bottom;
+		//}
+		//修复了RichEdit同时设置Width和Height为Auto时无法计算高度的问题（此时必须设置MaxWidth）
 		if (size.cx == DUI_LENGTH_AUTO) {
 			size.cx = iWidth + m_pLayout->GetPadding().left + m_pLayout->GetPadding().right;
 		}
-		else if (size.cy == DUI_LENGTH_AUTO) {
+		if (size.cy == DUI_LENGTH_AUTO) {
 			size.cy = iHeight + m_pLayout->GetPadding().top + m_pLayout->GetPadding().bottom;
 		}
 	}

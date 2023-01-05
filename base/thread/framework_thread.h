@@ -14,20 +14,20 @@ class FrameworkThread;
 
 struct FrameworkThreadTlsData
 {
-	FrameworkThread *self;		// A pointer pointed to the thread itself
-	bool quit_properly;			// the thread quit properly
-	int managed;				// reference counter, the framework thread is managed by ThreadManager
-	int managed_thread_id;		// if a thread is managered, this will be the manager id of it (may not be a thread id)
-	void *custom_data;			// reserved for the derived classes of FrameworkThread
+	FrameworkThread *self;		// 指向线程本身的指针
+	bool quit_properly;			// 线程正确退出
+	int managed;				// 引用计数器，框架线程由线程管理器管理
+	int managed_thread_id;		// 如果一个线程被管理，这将是它的管理器 ID（可能不是线程 ID）
+	void *custom_data;			// 为 Framework Thread 的派生类保留
 };
 
-// A simple thread abstraction that establishes a MessageLoop on a new thread.
-// The consumer uses the MessageLoop of the thread to cause code to execute on
-// the thread.  When this object is destroyed the thread is terminated.  All
-// pending tasks queued on the thread's message loop will run to completion
-// before the thread is terminated.
+// 一个简单的线程抽象，在新线程上建立消息循环。
+// 消费者使用线程的消息循环使代码执行
+// 线程。当此对象被销毁时，线程将终止。全部
+// 在线程的消息循环中排队的待处理任务将运行完成
+// 在线程终止之前。
 //
-// After the thread is stopped, the destruction sequence is:
+// 线程停止后，销毁顺序为：
 //
 //  (1) FrameworkThread::CleanUp()
 //  (2) MessageLoop::~MessageLoop
@@ -54,21 +54,21 @@ public:
 
 	virtual ~FrameworkThread();
 
-	// Starts the thread.  Returns true if the thread was successfully started;
-	// otherwise, returns false.  Upon successful return, the message_loop()
-	// getter will return non-null.
+	// 启动线程。如果线程已成功启动，则返回 true；
+	// 否则，返回 false。成功返回后，消息循环（）
+	// getter 将返回非空值。
 	//
-	// Note: This function can't be called on Windows with the loader lock held;
-	// i.e. during a DllMain, global object construction or destruction, atexit()
-	// callback.
+	// 注意：此函数不能在持有加载器锁的 Windows 上调用；
+	// 即在 Dll Main、全局对象构造或销毁期间，atexit()
+	// 打回来。
 	bool Start();
 
-	// Starts the thread. Behaves exactly like Start in addition to allow to
-	// override the default loop type.
+	// 启动线程。除了允许
+	// 覆盖默认的循环类型。
 	//
-	// Note: This function can't be called on Windows with the loader lock held;
-	// i.e. during a DllMain, global object construction or destruction, atexit()
-	// callback.
+	// 注意：此函数不能在持有加载器锁的 Windows 上调用；
+	// 即在 Dll Main、全局对象构造或销毁期间，atexit()
+	// 打回来。
 #if defined(OS_WIN)
 	bool StartWithLoop(const MessageLoop::Type type, Dispatcher *dispatcher = NULL);
 	bool StartWithLoop(CustomMessageLoopFactory *factory, Dispatcher *dispatcher = NULL);
@@ -77,24 +77,24 @@ public:
 	bool StartWithLoop(CustomMessageLoopFactory *factory);
 #endif // OS_WIN
 
-	// Create a message loop and run it on current thread
-	// Do be sure that the current thread is a crt thread (created by _beginthreadex, etc.) if OS = Windows
+	// 创建一个消息循环并在当前线程上运行
+	// 如果 OS = Windows，请确保当前线程是 crt 线程（由 beginthreadex 等创建）
 #if defined(OS_WIN)
 	void RunOnCurrentThreadWithLoop(const MessageLoop::Type type, Dispatcher *dispatcher = NULL);
 #else
 	void RunOnCurrentThreadWithLoop(const MessageLoop::Type type);
 #endif // OS_WIN
 
-	// Signals the thread to exit and returns once the thread has exited.  After
-	// this method returns, the Thread object is completely reset and may be used
-	// as if it were newly constructed (i.e., Start may be called again).
+	// 指示线程退出并在线程退出后返回。后
+	// 此方法返回，Thread 对象已完全重置并可以使用
+	// 就好像它是新构造的（即，可以再次调用 Start）。
 	//
-	// Stop may be called multiple times and is simply ignored if the thread is
-	// already stopped.
+	// Stop 可能会被多次调用，如果线程正在运行，它会被简单地忽略
+	// 已经停止了。
 	//
-	// NOTE: This method is optional.  It is not strictly necessary to call this
-	// method as the Thread's destructor will take care of stopping the thread if
-	// necessary.
+	// 注意：此方法是可选的。严格来说没有必要调用这个
+	// 方法作为线程的析构函数将负责停止线程，如果
+	// 必要的。
 	//
 	void Stop();
 

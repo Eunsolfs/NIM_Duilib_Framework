@@ -693,8 +693,7 @@ void RenderContext_GdiPlus::DrawBoxShadow(const UiRect& rc,
 	int nBlurSize, 
 	int nSpreadSize, 
 	DWORD dwColor, 
-	bool bExclude)
-{
+	bool bExclude) {
 #define USE_BLUR 1
 #define USE_COLOR_MATRIX 0
 
@@ -798,9 +797,7 @@ void RenderContext_GdiPlus::DrawBoxShadow(const UiRect& rc,
 		Gdiplus::UnitPixel);
 }
 
-ui::UiRect RenderContext_GdiPlus::MeasureText(const std::wstring& strText, const std::wstring& strFontId, UINT uStyle, int width /*= DUI_NOSET_VALUE*/)
-{
-	
+ui::UiRect RenderContext_GdiPlus::MeasureText(const std::wstring& strText, const std::wstring& strFontId, UINT uStyle, int width /*= DUI_NOSET_VALUE*/) {	
 	Gdiplus::InstalledFontCollection installedFontCollection;
 
 	// How many font families are installed?
@@ -843,6 +840,67 @@ ui::UiRect RenderContext_GdiPlus::MeasureText(const std::wstring& strText, const
 	}
 
 	UiRect rc(int(bounds.GetLeft()), int(bounds.GetTop()), int(bounds.GetRight() + 1), int(bounds.GetBottom() + 1));
+	return rc;
+}
+
+//修复了RichEdit同时设置Width和Height为Auto时无法计算高度的问题（此时必须设置MaxWidth）
+//https://github.com/xmcy0011/NIM_Duilib_Framework/commit/abea331f570c903228d333cda83358dcf7cec887
+ui::UiRect RenderContext_GdiPlus::MeasureTextEx(const std::wstring& strText, const std::wstring& strFontId, UINT uStyle, int width) {
+	Gdiplus::Graphics graphics(m_hDC);
+	Gdiplus::Font font(m_hDC, GlobalManager::GetFont(strFontId));
+	Gdiplus::RectF bounds;
+	Gdiplus::REAL height = 0;
+
+	// 参考：GDI+学习及代码总结之------文本与字体 https://blog.csdn.net/harvic880925/article/details/9097319
+	Gdiplus::StringFormat stringFormat = Gdiplus::StringFormat::GenericTypographic();
+	int formatFlags = 0;
+
+	/*if ((uStyle & DT_SINGLELINE) != 0) {
+		formatFlags |= Gdiplus::StringFormatFlagsNoWrap;
+	}*/
+	formatFlags |= Gdiplus::StringFormatFlagsNoClip;
+	stringFormat.SetFormatFlags(formatFlags);
+
+	// 不适用去尾，显示不下的时候
+	stringFormat.SetTrimming(Gdiplus::StringTrimming::StringTrimmingNone);
+
+	if (width == DUI_NOSET_VALUE) {
+		graphics.MeasureString(strText.c_str(), (int)strText.length(), &font, Gdiplus::PointF(), &stringFormat, &bounds);
+
+	}
+	else {
+		Gdiplus::RectF layoutRect(0, 0, width, 0);//高度为0，让其自动计算高度
+		INT codePointsFitted = 0;
+		INT linesFitted = 0; // 行数
+
+		graphics.MeasureString(strText.c_str(), strText.length(), &font, layoutRect, NULL, &bounds, &codePointsFitted, &linesFitted);
+
+		//Gdiplus::FontFamily ff;
+		//font.GetFamily(&ff);
+
+		// 下部举例
+		//UINT16 desent = ff.GetCellDescent(Gdiplus::FontStyle::FontStyleRegular);
+		//double descentPixel = font.GetSize() * desent / ff.GetEmHeight(Gdiplus::FontStyle::FontStyleRegular);
+
+		// 行间距
+		//double lineSpacing = ff.GetLineSpacing(Gdiplus::FontStyle::FontStyleRegular); // em
+		// 转换为px
+		//lineSpacing = font.GetSize() * lineSpacing / ff.GetEmHeight(Gdiplus::FontStyle::FontStyleRegular);
+
+		//int fontHeight = font.GetHeight(&graphics);
+		//height = linesFitted * fontHeight + (linesFitted - 1) * descentPixel;
+
+		/*Gdiplus::REAL height = 0;
+		if ((uStyle & DT_SINGLELINE) != 0) {
+			Gdiplus::RectF rcEmpty((Gdiplus::REAL)0, (Gdiplus::REAL)0, (Gdiplus::REAL)0, (Gdiplus::REAL)0);
+			graphics.MeasureString(strText.c_str(), strText.length(), &font, rcEmpty, &stringFormat, &bounds);
+			height = bounds.Height;
+		}
+		Gdiplus::RectF rcText((Gdiplus::REAL)0, (Gdiplus::REAL)0, (Gdiplus::REAL)width, height);
+		graphics.MeasureString(strText.c_str(), (int)strText.length(), &font, rcText, &stringFormat, &bounds);*/
+	}
+
+	UiRect rc(int(bounds.GetLeft()), int(bounds.GetTop()), int(bounds.GetRight() + 1), int(bounds.GetBottom() + 1 + height));
 	return rc;
 }
 

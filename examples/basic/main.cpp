@@ -5,8 +5,7 @@
 #include "main.h"
 #include "basic_form.h"
 
-enum ThreadId
-{
+enum ThreadId {
 	kThreadUI
 };
 

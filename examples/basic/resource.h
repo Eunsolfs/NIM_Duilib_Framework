@@ -12,7 +12,6 @@
 #define IDI_SMALL                       108
 #define IDC_BASIC                       109
 #define IDR_MAINFRAME                   128
-#define IDR_THEME1                      129
 #define IDR_THEME                       129
 #define IDC_STATIC                      -1
 
