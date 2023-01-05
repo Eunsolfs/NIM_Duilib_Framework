@@ -1,4 +1,4 @@
-// a implemention of a Windows specific message pump for user interface,
+﻿// a implemention of a Windows specific message pump for user interface,
 // the mechanism of which is from the Google Chrome project
 
 #ifndef BASE_FRAMEWORK_WIN_UI_MESSAGE_PUMP_H_

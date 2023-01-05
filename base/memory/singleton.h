@@ -1,4 +1,4 @@
-#ifndef BASE_MEMORY_SINGLETON_H_
+﻿#ifndef BASE_MEMORY_SINGLETON_H_
 #define BASE_MEMORY_SINGLETON_H_
 
 #include <memory>

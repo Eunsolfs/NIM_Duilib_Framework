@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "base/win32/path_util.h"
 #include "base/thread/thread_manager.h"
 
@@ -352,7 +352,7 @@ BOOL CTxtWinHost::Init(RichEdit *re, const CREATESTRUCT *pcs)
     //    goto err;
 
 	PCreateTextServices TextServicesProc = nullptr;
-	//解决32位系统下跨窗口间拖拽文字在win7及win7以下系统上会出现重复的问题（64位暂不修复） lty 20170714
+	//瑙ｅ喅32浣嶇郴缁熶笅璺ㄧ獥鍙ｉ棿鎷栨嫿鏂囧瓧鍦╳in7鍙妛in7浠ヤ笅绯荤粺涓婁細鍑虹幇閲嶅鐨勯棶棰橈紙64浣嶆殏涓嶄慨澶嶏級 lty 20170714
 #if defined(_M_X64) || defined(__x86_64__)
 	edit_dll = L"msftedit.dll";
 #else
@@ -469,7 +469,7 @@ int CTxtWinHost::TxReleaseDC(HDC hdc)
 
 BOOL CTxtWinHost::TxShowScrollBar(INT fnBar, BOOL fShow)
 {
-	ASSERT(FALSE); //暂时注释掉，不知道这代码有啥用   by panqinke 2014.5.6
+	ASSERT(FALSE);
     //ScrollBar* pVerticalScrollBar = m_re->GetVerticalScrollBar();
     //ScrollBar* pHorizontalScrollBar = m_re->GetHorizontalScrollBar();
     //if( fnBar == SB_VERT && pVerticalScrollBar ) {
@@ -1444,7 +1444,7 @@ void RichEdit::SetText(const std::wstring& strText)
 
 	m_linkInfo.clear();
 
-	//�޸���RichEditͬʱ����Width��HeightΪAutoʱ�޷�����߶ȵ����⣨��ʱ��������MaxWidth��
+	//修复了RichEdit同时设置Width和Height为Auto时无法计算高度的问题（此时必须设置MaxWidth）
 	//https://github.com/xmcy0011/NIM_Duilib_Framework/commit/abea331f570c903228d333cda83358dcf7cec887
 	if (this->GetFixedWidth() == DUI_LENGTH_AUTO || this->GetFixedHeight() == DUI_LENGTH_AUTO) {
 		this->ArrangeAncestor();
@@ -2041,8 +2041,7 @@ void RichEdit::SetImmStatus(BOOL bOpen)
 	{
 		// 失去焦点时关闭输入法
 		HIMC hImc = ::ImmGetContext(hwnd);
-    // 失去焦点是会把关联的输入法去掉，导致无法无法输入中文
-		//::ImmAssociateContext(hwnd, bOpen ? hImc : NULL);
+		// 失去焦点是会把关联的输入法去掉，导致无法无法输入中文
 		if (hImc != NULL) {
 			if (ImmGetOpenStatus(hImc)) {
 				if (!bOpen)
@@ -2243,7 +2242,7 @@ void RichEdit::SetEnabled(bool bEnable /*= true*/)
 	}
 }
 
-//�޸���RichEditͬʱ����Width��HeightΪAutoʱ�޷�����߶ȵ����⣨��ʱ��������MaxWidth��
+//修复了RichEdit同时设置Width和Height为Auto时无法计算高度的问题（此时必须设置MaxWidth）
 //https://github.com/xmcy0011/NIM_Duilib_Framework/commit/abea331f570c903228d333cda83358dcf7cec887
 SIZE RichEdit::CalWstringWidth(const std::wstring& name, const std::wstring& strFontId, UINT m_uTextStyle) {
 	HDC hDC = ::GetDC(NULL);
@@ -2275,11 +2274,11 @@ CSize RichEdit::EstimateSize(CSize szAvailable)
 		//	iHeight = 0;
 		//}
 
-		//�޸���RichEditͬʱ����Width��HeightΪAutoʱ�޷�����߶ȵ����⣨��ʱ��������MaxWidth��
+		//修复了RichEdit同时设置Width和Height为Auto时无法计算高度的问题（此时必须设置MaxWidth）
 		//https://github.com/xmcy0011/NIM_Duilib_Framework/commit/abea331f570c903228d333cda83358dcf7cec887
 		if (size.cx == DUI_LENGTH_AUTO && size.cy == DUI_LENGTH_AUTO) {
-			// fixed_by xmcy0011@sina.com 2021-04-22 ����width=auto && height=autoʱ��RichEdit�޷��Զ�������ߵ�����
-			// ��ʱҪ���������ȣ������޷����㡣
+			// fixed_by xmcy0011@sina.com 2021-04-22 设置width=auto && height=auto时，RichEdit无法自动计算宽高的问题
+			// 此时要设置最大宽度，否则无法计算。
 			ASSERT(GetMaxWidth() != 9999999);
 			iWidth = GetMaxWidth();
 		}
@@ -2307,7 +2306,7 @@ CSize RichEdit::EstimateSize(CSize szAvailable)
 		//else if (size.cy == DUI_LENGTH_AUTO) {
 		//	size.cy = iHeight + m_pLayout->GetPadding().top + m_pLayout->GetPadding().bottom;
 		//}
-		//�޸���RichEditͬʱ����Width��HeightΪAutoʱ�޷�����߶ȵ����⣨��ʱ��������MaxWidth��
+		//修复了RichEdit同时设置Width和Height为Auto时无法计算高度的问题（此时必须设置MaxWidth）
 		if (size.cx == DUI_LENGTH_AUTO) {
 			size.cx = iWidth + m_pLayout->GetPadding().left + m_pLayout->GetPadding().right;
 		}
@@ -3213,7 +3212,6 @@ void RichEdit::AddLinkInfoEx(const CHARRANGE cr, const std::wstring& linkInfo)
 
 	AddLinkInfo(cr, linkInfo);
 }
-
 //根据point来hittest自定义link的数据，返回true表示在link上，info是link的自定义属性
 bool RichEdit::HittestCustomLink(CPoint pt, std::wstring& info)
 {

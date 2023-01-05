@@ -1,4 +1,4 @@
-/** @file CircleProgress.h
+﻿/** @file CircleProgress.h
 * @brief 环型进度条控件，圆环中间可以有文本（如85%）
 * @copyright (c) 2019-2022, NetEase Inc. All rights reserved
 * @author Xuhuajie

@@ -1,4 +1,4 @@
-#ifndef BASE_FRAMEWORK_OBSERVER_LIST_H_
+﻿#ifndef BASE_FRAMEWORK_OBSERVER_LIST_H_
 #define BASE_FRAMEWORK_OBSERVER_LIST_H_
 
 #include <assert.h>

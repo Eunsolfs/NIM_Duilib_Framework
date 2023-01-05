@@ -1,4 +1,4 @@
-#ifndef UI_CONTROL_RICHEDIT_H_
+﻿#ifndef UI_CONTROL_RICHEDIT_H_
 #define UI_CONTROL_RICHEDIT_H_
 
 #pragma once
@@ -22,6 +22,7 @@ public:
 	RichEdit(const RichEdit& r) = delete;
 	RichEdit& operator=(const RichEdit& r) = delete;
     virtual ~RichEdit();
+
 
 	/**
 	 * @brief 判断是否接受 TAB 按键消息
@@ -133,13 +134,13 @@ public:
 	 * @param[in] nSize 字体大小
 	 * @param[in] bBold 是否粗体显示
 	 * @param[in] bUnderline 是否带有下划线
-	 * @param[in] bStrikeout 是否带有删除线
+	 * @param[in] bStrikeout bStrikeout
 	 * @param[in] bItalic 是否斜体显示
 	 * @return 无
 	 */
 	void SetFont(const std::wstring& pStrFontName, int nSize, bool bBold, bool bUnderline, bool bStrikeout, bool bItalic);
 
-	/**
+		/**
 	 * @brief 获取窗口样式
 	 * @return 返回窗口样式
 	 */
@@ -173,7 +174,7 @@ public:
 	std::wstring GetTextColor();
 	DWORD GetTextColorValue();
 
-	/**
+/**
 	 * @brief 获取限制字符数量
 	 * @return 返回限制字符数量
 	 */
@@ -690,7 +691,7 @@ public:
 	virtual UIAControlProvider* GetUIAProvider() override;
 	virtual void DoInit() override;
 	virtual void SetEnabled(bool bEnable = true) override;
-	//�޸���RichEditͬʱ����Width��HeightΪAutoʱ�޷�����߶ȵ����⣨��ʱ��������MaxWidth��
+	//修复了RichEdit同时设置Width和Height为Auto时无法计算高度的问题（此时必须设置MaxWidth）
 	//https://github.com/xmcy0011/NIM_Duilib_Framework/commit/abea331f570c903228d333cda83358dcf7cec887
 	SIZE CalWstringWidth(const std::wstring& name, const std::wstring& strFontId, UINT m_uTextStyle);
 	virtual CSize EstimateSize(CSize szAvailable) override;
@@ -898,10 +899,9 @@ public:
 
 	/**
 	 * @brief 添加一个范围用于 hittest 判断是否是链接信息,并将该范围内文字样式改为系统链接样式
-	 * @param[in] str 文字内容
 	 * @param[in] cr 范围的起始位置和结束位置
 	 * @param[in] linkInfo 自定义 link 属性
-	 * @return 无
+	 * @return 鏃?
 	 */
 	void AddLinkInfoEx(const CHARRANGE cr, const std::wstring& linkInfo);
 
@@ -920,12 +920,12 @@ public:
 	virtual void ClearImageCache() override;
 
   /**
-   * @brief ����prompt text align
-   * @return ��
+   * @brief 设置prompt text align
+   * @return 无
    */
   void SetPromptAlign(const std::wstring& promptAlign);
 
-	/**
+/**
 	 * @brief 监听回车按键按下事件
 	 * @param[in] callback 回车被按下的自定义回调函数
 	 * @return 无
@@ -954,18 +954,18 @@ public:
 	void AttachCustomLinkClk(const EventCallback& callback)	{ OnEvent[kEventCustomLinkClick] += callback; }
 
 	/**
-	 * @brief 监听大小变化事件
+ 	 * @brief 监听大小变化事件
 	 * @param[in] callback 大小被改变后的自定义回调函数
 	 * @return 无
 	 */
 	void AttachGetNaturalSize(const FunGetNaturalSize& callback) { m_cbGetNaturalSize = callback; };
 
-  /**
- * @brief �����ı����������仯�¼�
- * @param[in] callback ������С���ı����Զ���ص�����
- * @return ��
- */
-  void AttachTextLinesChange(const EventCallback& callback) { OnEvent[kEventTextLinesChange] += callback; };
+	/**
+	 * @brief 监听文本行数发生变化事件
+	 * @param[in] callback 行数大小被改变后的自定义回调函数
+	 * @return 无
+	 */
+	void AttachTextLinesChange(const EventCallback& callback) { OnEvent[kEventTextLinesChange] += callback; };
 
 	/**
 	 * @brief 通知控件值发生变化

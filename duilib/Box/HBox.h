@@ -1,4 +1,4 @@
-#ifndef UI_CORE_HBOX_H_
+﻿#ifndef UI_CORE_HBOX_H_
 #define UI_CORE_HBOX_H_
 
 #pragma once

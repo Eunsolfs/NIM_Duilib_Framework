@@ -1,4 +1,4 @@
-#include "multi_browser_form.h"
+﻿#include "multi_browser_form.h"
 #include "browser/browser_box.h"
 #include "browser/multi_browser_manager.h"
 #include "control/browser_tab_item.h"
@@ -14,8 +14,7 @@ namespace
 	UINT WM_TASKBARBUTTONCREATED = ::RegisterWindowMessage(TEXT("TaskbarButtonCreated"));
 
 	// 窗口收到WM_CLOSE消息的原因
-	enum CloseReason
-	{
+	enum CloseReason {
 		kDefaultClose = 0,		// 在任务栏右击关闭窗口，按Alt+F4等常规原因
 		kBrowserBoxClose = 1	// 关闭了最后一个浏览器盒子导致窗口关闭
 	};
@@ -96,10 +95,10 @@ LRESULT MultiBrowserForm::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		else if (wParam == SIZE_MAXIMIZED)
 			OnWndSizeMax(true);
 	}
-	else if (uMsg == WM_SETFOCUS) { // fixed by xmcy0011@sina.com win7�������С��ʱ��libcef3��ҳ�޷�ֱ�ӹ������
-		//fixed win7�������С��ʱ��libcef3��ҳ�޷�ֱ�����ӹ�������ǩ 
+	else if (uMsg == WM_SETFOCUS) { // fixed by xmcy0011@sina.com win7下最大化最小化时，libcef3网页无法直接滚动鼠标
+		//fixed win7下最大化最小化时，libcef3网页无法直接连接滚动鼠标标签 
 		// https://github.com/xmcy0011/NIM_Duilib_Framework/commit/7305b49227a53f6ed76b86367db814c05bb4dd7d
-		//fixed  WM_NCCALCSIZE -> ʹ��WM_SETFOCUS���棬win7���յ�WM_SIZE������ʱ���޷�����
+		//fixed  WM_NCCALCSIZE -> 使用WM_SETFOCUS代替，win7会收到WM_SIZE，但有时还无法滚动
 		//https://github.com/xmcy0011/NIM_Duilib_Framework/commit/c6f3361b00a149b9697fe71ffda78cfbddfa2000
 		if (active_browser_box_ != nullptr && active_browser_box_->GetCefControl() != nullptr) {
 			ui::EventArgs e;
@@ -112,7 +111,7 @@ LRESULT MultiBrowserForm::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	else if (uMsg == WM_KEYDOWN)
 	{
-		// 处理Ctrl+Tab快捷键
+		// 澶勭悊Ctrl+Tab蹇嵎閿?
 		if (wParam == VK_TAB && ::GetKeyState(VK_CONTROL) < 0)
 		{
 			int next = tab_list_->GetCurSel();
@@ -120,7 +119,7 @@ LRESULT MultiBrowserForm::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			tab_list_->SelectItem(next);
 			return 0;
 		}
-		// 处理ESC快捷键
+		// 澶勭悊ESC蹇嵎閿?
 		else if (wParam == VK_ESCAPE)
 		{
 			BOOL bHandled = FALSE;
@@ -297,7 +296,7 @@ bool MultiBrowserForm::OnReturn(ui::EventArgs* arg)
 	if (name == L"edit_url")
 	{
 #if 0
- 		// 在当前页面跳转
+		// 在当前页面跳转
  		auto cef_control = active_browser_box_->GetCefControl();
  		if (cef_control)
  			cef_control->LoadURL(edit_url_->GetText());

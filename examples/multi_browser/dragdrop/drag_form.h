@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 /** @class DragForm
   * @brief 模仿系统拖拽功能的半透明窗体，因为使用了低级键盘钩子所以一些安全软件会拦截

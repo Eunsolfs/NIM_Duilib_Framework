@@ -1,4 +1,4 @@
-#include "drag_form.h"
+﻿#include "drag_form.h"
 #include "bitmap_control.h"
 
 using namespace ui;

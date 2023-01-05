@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "include/cef_app.h"
 #include "base/memory/singleton.h"
 

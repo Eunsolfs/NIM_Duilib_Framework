@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "cef_native_control.h"
 #include "include/cef_browser.h"
 #include "include/cef_frame.h"
@@ -17,12 +17,12 @@ CefNativeControl::~CefNativeControl(void)
 {
 	if (browser_handler_.get() && browser_handler_->GetBrowser().get())
 	{
-		//�����multi_browser�ڴ�й©������
+		//解决了multi_browser内存泄漏的问题
 		//https://github.com/xmcy0011/NIM_Duilib_Framework/commit/4d7efc1bcd13181c95d8b6082c1816bdee9c0509
 		auto hwnd = GetCefHandle();
 		DWORD dwStyle = GetWindowLong(hwnd, GWL_STYLE);
-		// ��ΪReCreateBrowser��ʹ����SetAsChild����Browser���Ǹ��ݽ���WM_CLOSE��Ϣ���ر��ͷŵ�
-		// ���������˳�ǰ����Ҫ����һ�¸����ڣ����������ڴ�й©����ֻ������MultiBrowserForm�˳�ʱ���ͷ��ڴ档
+		// 因为ReCreateBrowser中使用了SetAsChild，而Browser又是根据接收WM_CLOSE消息来关闭释放的
+		// 所以这里退出前，需要更改一下父窗口，否则会造成内存泄漏或者只有整个MultiBrowserForm退出时才释放内存。
 		if (dwStyle & WS_CHILD)
 			::SetParent(hwnd, GetDesktopWindow());
 

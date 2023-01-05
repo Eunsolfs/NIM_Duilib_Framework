@@ -1,4 +1,4 @@
-#ifndef UI_UTILS_SHADOW_H_
+﻿#ifndef UI_UTILS_SHADOW_H_
 #define UI_UTILS_SHADOW_H_
 
 #pragma once

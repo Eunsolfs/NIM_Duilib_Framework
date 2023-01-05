@@ -1,4 +1,4 @@
-// Copyright (c) 2015, NetEase Inc.
+﻿// Copyright (c) 2015, NetEase Inc.
 // All rights reserved.
 //
 // Author: Redrain

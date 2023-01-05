@@ -1,4 +1,4 @@
-// name/value map
+﻿// name/value map
 // !note: the map save the point of value, so the value's life circle must more than the valuemap
 
 #ifndef BASE_UTIL_VALUEMAP_H_

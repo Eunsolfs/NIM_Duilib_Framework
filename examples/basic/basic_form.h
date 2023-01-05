@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 class BasicForm : public ui::WindowImplBase
 {

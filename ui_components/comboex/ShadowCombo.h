@@ -185,8 +185,8 @@ public:
   ui::ListBox* GetCustomLayout() const { return m_pLayout.get(); }
 
   /**
-  * @brief ����arrow��offset
-  * @return ��
+  * @brief 设置arrow的offset
+  * @return 无
   */
   void SetArrowOffset(int offset, bool bNeedDpiScale = true);
 

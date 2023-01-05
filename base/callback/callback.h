@@ -1,4 +1,4 @@
-#ifndef BASE_UTIL_CALLBACK_H_
+﻿#ifndef BASE_UTIL_CALLBACK_H_
 #define BASE_UTIL_CALLBACK_H_
 #pragma once
 

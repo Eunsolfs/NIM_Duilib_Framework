@@ -1,4 +1,4 @@
-#ifndef UI_UTILS_APIWRAPPER_H_
+﻿#ifndef UI_UTILS_APIWRAPPER_H_
 #define UI_UTILS_APIWRAPPER_H_
 
 #pragma once

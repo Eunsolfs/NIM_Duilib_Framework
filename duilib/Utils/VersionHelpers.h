@@ -1,4 +1,4 @@
-#ifndef UI_VERSION_HELPERS_H_
+﻿#ifndef UI_VERSION_HELPERS_H_
 #define UI_VERSION_HELPERS_H_
 
 #pragma once

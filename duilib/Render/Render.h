@@ -1,4 +1,4 @@
-#ifndef UI_CORE_RENDER_H_
+ï»¿#ifndef UI_CORE_RENDER_H_
 #define UI_CORE_RENDER_H_
 
 #pragma once
@@ -62,11 +62,11 @@ public:
 	virtual void DrawEllipse(const UiRect& rc, int nSize, DWORD dwColor) override;
 	virtual void FillEllipse(const UiRect& rc, DWORD dwColor) override;
 
-  virtual void DrawCircle(const UiRect& rc, int nSize, DWORD dwColor) override;
-  virtual void FillCircle(const UiRect& rc, DWORD dwColor) override;
+    virtual void DrawCircle(const UiRect& rc, int nSize, DWORD dwColor) override;
+    virtual void FillCircle(const UiRect& rc, DWORD dwColor) override;
 
 	virtual UiRect MeasureText(const std::wstring& strText, const std::wstring& strFontId, UINT uStyle, int width = DUI_NOSET_VALUE) override;
-	//ĞŞ¸´ÁËRichEditÍ¬Ê±ÉèÖÃWidthºÍHeightÎªAutoÊ±ÎŞ·¨¼ÆËã¸ß¶ÈµÄÎÊÌâ£¨´ËÊ±±ØĞëÉèÖÃMaxWidth£©
+	//ä¿®å¤äº†RichEditåŒæ—¶è®¾ç½®Widthå’ŒHeightä¸ºAutoæ—¶æ— æ³•è®¡ç®—é«˜åº¦çš„é—®é¢˜ï¼ˆæ­¤æ—¶å¿…é¡»è®¾ç½®MaxWidthï¼‰
     //https://github.com/xmcy0011/NIM_Duilib_Framework/commit/abea331f570c903228d333cda83358dcf7cec887
 	virtual UiRect MeasureTextEx(const std::wstring& strText, const std::wstring& strFontId, UINT uStyle, int width = DUI_NOSET_VALUE) = 0;
 

@@ -1,4 +1,4 @@
-// This file defines all kinds of tasks
+﻿// This file defines all kinds of tasks
 
 #ifndef BASE_FRAMEWORK_TASK_H_
 #define BASE_FRAMEWORK_TASK_H_

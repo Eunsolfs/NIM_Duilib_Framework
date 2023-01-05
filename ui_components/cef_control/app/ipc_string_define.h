@@ -1,4 +1,4 @@
-/** @file ipc_string_define.h
+﻿/** @file ipc_string_define.h
   * @brief 定义Render进程与Browser进程通信所用常量
   * @copyright (c) 2016, NetEase Inc. All rights reserved
   * @author Redrain

@@ -1,4 +1,4 @@
-#ifndef UI_UTILS_STRINGUTIL_H_
+﻿#ifndef UI_UTILS_STRINGUTIL_H_
 #define UI_UTILS_STRINGUTIL_H_
 
 namespace ui

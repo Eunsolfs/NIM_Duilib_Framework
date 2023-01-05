@@ -1,4 +1,4 @@
-/** @file client_app.h
+﻿/** @file client_app.h
   * @brief 定义Browser进程的CefApp类，管理Cef模块的生命周期
   * @copyright (c) 2016, NetEase Inc. All rights reserved
   * @author Redrain

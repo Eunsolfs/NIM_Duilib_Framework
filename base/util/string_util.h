@@ -1,4 +1,4 @@
-#ifndef BASE_UTIL_STRING_UTIL_H_
+﻿#ifndef BASE_UTIL_STRING_UTIL_H_
 #define BASE_UTIL_STRING_UTIL_H_
 
 #include <list>

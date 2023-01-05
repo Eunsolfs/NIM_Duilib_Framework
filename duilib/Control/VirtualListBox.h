@@ -1,4 +1,4 @@
-// Copyright 2017, NetEase (Hangzhou) Network Co., Ltd. All rights reserved.
+﻿// Copyright 2017, NetEase (Hangzhou) Network Co., Ltd. All rights reserved.
 //
 // zqw
 // 2015/7/22

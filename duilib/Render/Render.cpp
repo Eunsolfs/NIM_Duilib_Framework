@@ -1,4 +1,4 @@
-#include "StdAfx.h"
+ï»¿#include "StdAfx.h"
 
 namespace ui {
 
@@ -693,7 +693,8 @@ void RenderContext_GdiPlus::DrawBoxShadow(const UiRect& rc,
 	int nBlurSize, 
 	int nSpreadSize, 
 	DWORD dwColor, 
-	bool bExclude) {
+	bool bExclude)
+{
 #define USE_BLUR 1
 #define USE_COLOR_MATRIX 0
 
@@ -843,7 +844,7 @@ ui::UiRect RenderContext_GdiPlus::MeasureText(const std::wstring& strText, const
 	return rc;
 }
 
-//ĞŞ¸´ÁËRichEditÍ¬Ê±ÉèÖÃWidthºÍHeightÎªAutoÊ±ÎŞ·¨¼ÆËã¸ß¶ÈµÄÎÊÌâ£¨´ËÊ±±ØĞëÉèÖÃMaxWidth£©
+//ä¿®å¤äº†RichEditåŒæ—¶è®¾ç½®Widthå’ŒHeightä¸ºAutoæ—¶æ— æ³•è®¡ç®—é«˜åº¦çš„é—®é¢˜ï¼ˆæ­¤æ—¶å¿…é¡»è®¾ç½®MaxWidthï¼‰
 //https://github.com/xmcy0011/NIM_Duilib_Framework/commit/abea331f570c903228d333cda83358dcf7cec887
 ui::UiRect RenderContext_GdiPlus::MeasureTextEx(const std::wstring& strText, const std::wstring& strFontId, UINT uStyle, int width) {
 	Gdiplus::Graphics graphics(m_hDC);
@@ -851,7 +852,7 @@ ui::UiRect RenderContext_GdiPlus::MeasureTextEx(const std::wstring& strText, con
 	Gdiplus::RectF bounds;
 	Gdiplus::REAL height = 0;
 
-	// ²Î¿¼£ºGDI+Ñ§Ï°¼°´úÂë×Ü½áÖ®------ÎÄ±¾Óë×ÖÌå https://blog.csdn.net/harvic880925/article/details/9097319
+	// å‚è€ƒï¼šGDI+å­¦ä¹ åŠä»£ç æ€»ç»“ä¹‹------æ–‡æœ¬ä¸å­—ä½“ https://blog.csdn.net/harvic880925/article/details/9097319
 	Gdiplus::StringFormat stringFormat = Gdiplus::StringFormat::GenericTypographic();
 	int formatFlags = 0;
 
@@ -861,7 +862,7 @@ ui::UiRect RenderContext_GdiPlus::MeasureTextEx(const std::wstring& strText, con
 	formatFlags |= Gdiplus::StringFormatFlagsNoClip;
 	stringFormat.SetFormatFlags(formatFlags);
 
-	// ²»ÊÊÓÃÈ¥Î²£¬ÏÔÊ¾²»ÏÂµÄÊ±ºò
+	// ä¸é€‚ç”¨å»å°¾ï¼Œæ˜¾ç¤ºä¸ä¸‹çš„æ—¶å€™
 	stringFormat.SetTrimming(Gdiplus::StringTrimming::StringTrimmingNone);
 
 	if (width == DUI_NOSET_VALUE) {
@@ -869,22 +870,22 @@ ui::UiRect RenderContext_GdiPlus::MeasureTextEx(const std::wstring& strText, con
 
 	}
 	else {
-		Gdiplus::RectF layoutRect(0, 0, width, 0);//¸ß¶ÈÎª0£¬ÈÃÆä×Ô¶¯¼ÆËã¸ß¶È
+		Gdiplus::RectF layoutRect(0, 0, width, 0);//é«˜åº¦ä¸º0ï¼Œè®©å…¶è‡ªåŠ¨è®¡ç®—é«˜åº¦
 		INT codePointsFitted = 0;
-		INT linesFitted = 0; // ĞĞÊı
+		INT linesFitted = 0; // è¡Œæ•°
 
 		graphics.MeasureString(strText.c_str(), strText.length(), &font, layoutRect, NULL, &bounds, &codePointsFitted, &linesFitted);
 
 		//Gdiplus::FontFamily ff;
 		//font.GetFamily(&ff);
 
-		// ÏÂ²¿¾ÙÀı
+		// ä¸‹éƒ¨ä¸¾ä¾‹
 		//UINT16 desent = ff.GetCellDescent(Gdiplus::FontStyle::FontStyleRegular);
 		//double descentPixel = font.GetSize() * desent / ff.GetEmHeight(Gdiplus::FontStyle::FontStyleRegular);
 
-		// ĞĞ¼ä¾à
+		// è¡Œé—´è·
 		//double lineSpacing = ff.GetLineSpacing(Gdiplus::FontStyle::FontStyleRegular); // em
-		// ×ª»»Îªpx
+		// è½¬æ¢ä¸ºpx
 		//lineSpacing = font.GetSize() * lineSpacing / ff.GetEmHeight(Gdiplus::FontStyle::FontStyleRegular);
 
 		//int fontHeight = font.GetHeight(&graphics);

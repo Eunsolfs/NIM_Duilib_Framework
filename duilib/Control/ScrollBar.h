@@ -1,4 +1,4 @@
-#ifndef UI_CONTROL_SCROLLBAR_H_
+﻿#ifndef UI_CONTROL_SCROLLBAR_H_
 #define UI_CONTROL_SCROLLBAR_H_
 
 #pragma once
