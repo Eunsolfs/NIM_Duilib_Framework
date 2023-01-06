@@ -550,6 +550,7 @@ namespace ui
 		{
 			return m_hLayout[col_index];
 		}
+		return 0;
 	}
 	void GridBody::SetColumnWidth(int col_index, int width)
 	{
@@ -573,6 +574,7 @@ namespace ui
 		{
 			return m_vLayout[row_index];
 		}
+		return 0;
 	}
 	void GridBody::SetRowHeight(int row_index, int height)
 	{
