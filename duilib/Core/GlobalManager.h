@@ -34,7 +34,7 @@ public:
 
 	/**
 	 * @brief 开启禁用自动化测试支持
-	 * @param[in] bAdaptDpi 是否启用 DPI 适配
+	 * @param[in] bEnabled 是否启用
 	 * @return 无
 	 */
 	static void EnableAutomation(bool bEnabled = true);
